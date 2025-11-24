@@ -20,6 +20,11 @@ export const routes: Routes = [
         component: MainLayout,
         children: [
             {
+                path: '',
+                redirectTo: 'admin/login',
+                pathMatch: 'full'
+            },
+            {
                 path: 'admin/login',
                 component: AdminLogin,
             },
