@@ -112,6 +112,6 @@ export const routes: Routes = [
     },
     {
         path: '**',
-        redirectTo: 'admin',
+        redirectTo: 'admin/login',
     },
 ];

@@ -1,5 +1,5 @@
 runtime: python312
-service: front
+service: sisloteamento-front
 
 automatic_scaling:
   min_instances: 0
