@@ -1,0 +1,55 @@
+<div class="container">
+  <div class="row justify-content-center pt-4 min-vh-100">
+    <div class="col-md-6 col-lg-6">
+      <div class="card shadow border-0">
+        <div class="card-body">
+          <h2 class="text-center mb-4">Entrar</h2>
+          
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="documento" class="form-label">Documento</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="documento" 
+                formControlName="documento"
+                [class.is-invalid]="loginForm.get('documento')?.invalid && loginForm.get('documento')?.touched"
+                placeholder="Digite seu documento"
+              >
+              <div class="invalid-feedback" *ngIf="loginForm.get('documento')?.invalid && loginForm.get('documento')?.touched">
+                Documento é obrigatório
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="senha" class="form-label">Senha</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                id="senha" 
+                formControlName="senha"
+                [class.is-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched"
+                placeholder="Digite sua senha"
+              >
+              <div class="invalid-feedback" *ngIf="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched">
+                Senha é obrigatória
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              class="btn btn-primary w-100" 
+              [disabled]="isLoading"
+            >
+              <span *ngIf="!isLoading">Entrar</span>
+              <span *ngIf="isLoading">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Carregando...
+              </span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

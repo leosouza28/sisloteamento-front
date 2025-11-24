@@ -1,0 +1,38 @@
+runtime: python312
+service: front
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 1
+
+handlers:
+  # 0. Manifesto PWA com MIME correto
+  - url: /manifest\.webmanifest
+    static_files: dist/dreamsloteamento-front/browser/manifest.webmanifest
+    upload: dist/dreamsloteamento-front/browser/manifest.webmanifest
+    mime_type: application/manifest+json
+    secure: always
+  - url: /manifest-valedasminas\.webmanifest
+    static_files: dist/dreamsloteamento-front/browser/manifest-valedasminas.webmanifest
+    upload: dist/dreamsloteamento-front/browser/manifest-valedasminas.webmanifest
+    mime_type: application/manifest+json
+    secure: always
+
+  # 1. Arquivos .wasm com o MIME type explicitamente forçado
+  - url: /(.*\.wasm)$
+    static_files: dist/dreamsloteamento-front/browser/\1
+    upload: dist/dreamsloteamento-front/browser/.*\.wasm
+    mime_type: application/wasm
+    secure: always
+
+  # 2. Demais arquivos estáticos
+  - url: /(.*\.(ico|gif|png|ttf|woff|woff2|eot|svg|jpg|jpeg|css|js)(|\.map))$
+    static_files: dist/dreamsloteamento-front/browser/\1
+    upload: dist/dreamsloteamento-front/browser/.*\.(ico|gif|png|ttf|woff|woff2|eot|svg|jpg|jpeg|css|js)(|\.map)
+    secure: always
+
+  # 3. Roteamento SPA: qualquer outro caminho → index.html
+  - url: /.*
+    static_files: dist/dreamsloteamento-front/browser/index.html
+    upload: dist/dreamsloteamento-front/browser/index.html
+    secure: always

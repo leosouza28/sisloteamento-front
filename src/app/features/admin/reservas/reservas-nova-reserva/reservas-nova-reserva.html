@@ -1,0 +1,520 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="mb-0">Nova Reserva</h2>
+      <p class="text-muted mb-0">Etapa {{ etapa() }} de 2</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+  } @else {
+    @if (etapa() === 1) {
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0">1. Selecionar Loteamento e Lotes</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <label class="form-label mb-3">Selecione um Loteamento <span class="text-danger">*</span></label>
+            <div class="row">
+              @for (loteamento of loteamentos(); track loteamento._id) {
+                <div class="col-md-4 mb-3">
+                  <div
+                    class="card h-100 cursor-pointer"
+                    [ngClass]="loteamentoSelecionado()?._id === loteamento._id ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary'"
+                    (click)="onLoteamentoChange(loteamento)"
+                    style="cursor: pointer; transition: all 0.2s;"
+                  >
+                    <div class="card-body">
+                      <h6 class="card-title" [ngClass]="loteamentoSelecionado()?._id === loteamento._id ? 'text-primary' : ''">
+                        <i class="bi bi-geo-alt-fill me-2"></i>{{ loteamento.nome }}
+                      </h6>
+                      @if (loteamento.descricao) {
+                        <p class="card-text small text-muted mb-2">{{ loteamento.descricao }}</p>
+                      }
+                      <p class="card-text mb-0">
+                        <small class="text-muted">
+                          <i class="bi bi-pin-map me-1"></i>{{ loteamento.cidade }} / {{ loteamento.estado }}
+                        </small>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (hasMapaEmpreendimento()) {
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+              <div>
+                <i class="bi bi-map me-2"></i>
+                <strong>Mapa do Empreendimento disponível</strong>
+              </div>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                (click)="abrirModalMapaEmpreendimento(mapaModal)"
+              >
+                <i class="bi bi-eye me-1"></i>Visualizar Mapa
+              </button>
+            </div>
+          }
+
+          @if (quadrasAgrupadas().length > 0) {
+            <div class="row">
+              @for (quadra of quadrasAgrupadas(); track quadra.quadra) {
+                <div class="col-12 mb-4">
+                  <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                      <h6 class="mb-0">Quadra {{ quadra.quadra }}</h6>
+                    </div>
+                    <div class="card-body">
+                      <div class="d-flex flex-wrap gap-2">
+                        @for (lote of quadra.lotes; track lote._id) {
+                          <button
+                            type="button"
+                            class="btn position-relative"
+                            [ngClass]="isLoteSelecionado(lote._id) ? 'btn-primary' : getLoteStatusClass(lote.situacao)"
+                            [disabled]="!isLoteDisponivel(lote.situacao)"
+                            (click)="toggleLote(lote._id)"
+                            [ngbPopover]="popoverContent"
+                            triggers="mouseenter:mouseleave"
+                            [popoverTitle]="'Lote ' + lote.lote + ' - Quadra ' + lote.quadra"
+                            container="body"
+                            [openDelay]="300"
+                            [popoverContext]="{lote: lote}"
+                          >
+                            @if (isLoteSelecionado(lote._id)) {
+                              <i class="bi bi-check-circle-fill position-absolute top-0 start-100 translate-middle text-success" style="font-size: 1.2rem;"></i>
+                            }
+                            Lote {{ lote.lote }}
+                            <br>
+                            <small>{{ lote.area }} m²</small>
+                          </button>
+                        }
+                      </div>
+
+                      <ng-template #popoverContent let-lote="lote">
+                        <div class="text-start">
+                          <div class="mb-1">
+                            <strong>Área:</strong> {{ lote.area | number:'1.2-2' }} m²
+                          </div>
+                          <div class="mb-1">
+                            <strong>Valor/m²:</strong> {{ lote.valor_area | currency:'BRL' }}
+                          </div>
+                          <div class="mb-1">
+                            <strong>Entrada:</strong> {{ lote.valor_entrada | currency:'BRL' }}
+                          </div>
+                          <div class="mb-1">
+                            <strong>Valor Total:</strong> {{ lote.valor_total | currency:'BRL' }}
+                          </div>
+                          <div>
+                            <strong>Situação:</strong> 
+                            <span class="badge" [ngClass]="'bg-' + getSituacaoBadgeClass(lote.situacao)">
+                              {{ lote.situacao }}
+                            </span>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (totalSelecionados > 0) {
+              <div class="card bg-light">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h5>Lotes Selecionados: {{ totalSelecionados }}</h5>
+                    </div>
+                    <div class="col-md-6 text-end">
+                      <h5>Valor Total: {{ valorTotalSelecionados | currency:'BRL' }}</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mb-4">
+        <button type="button" class="btn btn-primary" (click)="proximaEtapa()" [disabled]="totalSelecionados === 0">
+          Próxima Etapa <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelar()">
+          Cancelar
+        </button>
+      </div>
+    }
+
+    @if (etapa() === 2) {
+      <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0">2. Buscar Cliente</h5>
+          </div>
+          <div class="card-body">
+            @if (!clienteSelecionado()) {
+              <div class="row">
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Buscar por CPF ou Nome</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [value]="buscaCliente()"
+                      (input)="onBuscaClienteChange($any($event.target).value)"
+                      placeholder="Digite o CPF ou nome do cliente..."
+                    />
+                    @if (buscandoCliente()) {
+                      <span class="input-group-text">
+                        <span class="spinner-border spinner-border-sm"></span>
+                      </span>
+                    }
+                  </div>
+                  
+                  @if (clientesEncontrados().length > 0) {
+                    <div class="list-group mt-2">
+                      @for (cliente of clientesEncontrados(); track cliente._id) {
+                        <button
+                          type="button"
+                          class="list-group-item list-group-item-action"
+                          (click)="selecionarCliente(cliente)"
+                        >
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                              <h6 class="mb-0">{{ cliente.nome }}</h6>
+                              <small class="text-muted">CPF: {{ cliente.documento }}</small>
+                              @if (cliente.email) {
+                                <small class="text-muted ms-2">• {{ cliente.email }}</small>
+                              }
+                            </div>
+                            <i class="bi bi-arrow-right-circle text-primary"></i>
+                          </div>
+                        </button>
+                      }
+                    </div>
+                  }
+                  
+                  @if (buscaCliente().length >= 3 && clientesEncontrados().length === 0 && !buscandoCliente() && !sugerirCriacaoComCPF()) {
+                    <div class="alert alert-info mt-2 mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      Nenhum cliente encontrado com este termo.
+                    </div>
+                  }
+                  
+                  @if (sugerirCriacaoComCPF()) {
+                    <div class="alert alert-success mt-2 mb-0 d-flex justify-content-between align-items-center">
+                      <div>
+                        <i class="bi bi-check-circle me-2"></i>
+                        <strong>CPF válido detectado!</strong>
+                        <p class="mb-0 mt-1 small">CPF <strong>{{ sugerirCriacaoComCPF() }}</strong> não encontrado no sistema.</p>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-success btn-sm"
+                        (click)="abrirModalNovoClienteComCPF(sugerirCriacaoComCPF()!)"
+                      >
+                        <i class="bi bi-plus-circle me-1"></i>Cadastrar Cliente
+                      </button>
+                    </div>
+                  }
+                </div>
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+                  <button
+                    type="button"
+                    class="btn btn-success w-100"
+                    (click)="abrirModalNovoCliente()"
+                  >
+                    <i class="bi bi-plus-circle me-2"></i>Novo Cliente
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="alert alert-success">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-0">
+                      <i class="bi bi-person-check-fill me-2"></i>{{ clienteSelecionado().nome }}
+                    </h6>
+                    <small>CPF: {{ clienteSelecionado().documento }}</small>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="limparClienteSelecionado()"
+                  >
+                    <i class="bi bi-x-circle me-1"></i>Alterar Cliente
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (clienteSelecionado()) {
+          <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Resumo dos Lotes Selecionados</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Quadra</th>
+                      <th>Lote</th>
+                      <th class="text-end">Área (m²)</th>
+                      <th class="text-end">Valor/m²</th>
+                      <th class="text-end">Entrada</th>
+                      <th class="text-end">Valor Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (lote of getLotesDetalhesSelecionados(); track lote._id) {
+                      <tr>
+                        <td>{{ lote.quadra }}</td>
+                        <td>{{ lote.lote }}</td>
+                        <td class="text-end">{{ lote.area | number:'1.2-2' }}</td>
+                        <td class="text-end">{{ lote.valor_area | currency:'BRL' }}</td>
+                        <td class="text-end">{{ lote.valor_entrada | currency:'BRL' }}</td>
+                        <td class="text-end">{{ lote.valor_total | currency:'BRL' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr class="table-light fw-bold">
+                      <td colspan="4" class="text-end">Total Entrada:</td>
+                      <td class="text-end">{{ valorEntradaSelecionados | currency:'BRL' }}</td>
+                      <td class="text-end"></td>
+                    </tr>
+                    <tr class="table-light fw-bold">
+                      <td colspan="4" class="text-end">Total Geral:</td>
+                      <td class="text-end"></td>
+                      <td class="text-end">{{ valorTotalSelecionados | currency:'BRL' }}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Vendedor</h5>
+            </div>
+            <div class="card-body">
+              @if (!vendedorSelecionado()) {
+                <button
+                  type="button"
+                  class="btn btn-outline-primary"
+                  (click)="abrirModalSelecionarVendedor(modalVendedores)"
+                >
+                  <i class="bi bi-person-plus me-2"></i>Selecionar Vendedor
+                </button>
+              } @else {
+                <div class="alert alert-info mb-0">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="mb-0">
+                        <i class="bi bi-person-check-fill me-2"></i>{{ vendedorSelecionado().nome }}
+                      </h6>
+                      @if (vendedorSelecionado().email) {
+                        <small class="text-muted">{{ vendedorSelecionado().email }}</small>
+                      }
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="limparVendedorSelecionado()"
+                    >
+                      <i class="bi bi-x-circle me-1"></i>Remover
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="bi bi-person-fill me-2"></i>Dados do Cliente</h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <strong class="text-muted d-block mb-1">Nome:</strong>
+                  <p class="mb-0">{{ clienteSelecionado().nome }}</p>
+                </div>
+                <div class="col-md-3">
+                  <strong class="text-muted d-block mb-1">CPF:</strong>
+                  <p class="mb-0">{{ clienteSelecionado().documento }}</p>
+                </div>
+                <div class="col-md-3">
+                  <strong class="text-muted d-block mb-1">Telefone:</strong>
+                  <p class="mb-0">{{ clienteSelecionado().telefone_principal?.valor || 'Não informado' }}</p>
+                </div>
+              </div>
+
+              @if (clienteSelecionado().email) {
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <strong class="text-muted d-block mb-1">E-mail:</strong>
+                    <p class="mb-0">{{ clienteSelecionado().email }}</p>
+                  </div>
+                </div>
+              }
+
+              @if (clienteSelecionado().endereco) {
+                <hr>
+                <h6 class="text-muted mb-3">Endereço</h6>
+                <div class="row mb-2">
+                  <div class="col-md-9">
+                    <strong class="text-muted d-block mb-1">Logradouro:</strong>
+                    <p class="mb-0">
+                      {{ clienteSelecionado().endereco.logradouro }}
+                      @if (clienteSelecionado().endereco.numero) {
+                        , {{ clienteSelecionado().endereco.numero }}
+                      }
+                      @if (clienteSelecionado().endereco.complemento) {
+                        - {{ clienteSelecionado().endereco.complemento }}
+                      }
+                    </p>
+                  </div>
+                  <div class="col-md-3">
+                    <strong class="text-muted d-block mb-1">CEP:</strong>
+                    <p class="mb-0">{{ clienteSelecionado().endereco.cep || 'Não informado' }}</p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-5">
+                    <strong class="text-muted d-block mb-1">Bairro:</strong>
+                    <p class="mb-0">{{ clienteSelecionado().endereco.bairro || 'Não informado' }}</p>
+                  </div>
+                  <div class="col-md-5">
+                    <strong class="text-muted d-block mb-1">Cidade:</strong>
+                    <p class="mb-0">{{ clienteSelecionado().endereco.cidade || 'Não informado' }}</p>
+                  </div>
+                  <div class="col-md-2">
+                    <strong class="text-muted d-block mb-1">UF:</strong>
+                    <p class="mb-0">{{ clienteSelecionado().endereco.estado || 'N/A' }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+      <div class="d-flex gap-2 mb-4">
+        <button type="button" class="btn btn-success" (click)="salvar()" [disabled]="saving() || !clienteSelecionado()">
+          @if (saving()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          <i class="bi bi-check-circle me-2"></i>Confirmar Reserva
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="voltarEtapa()">
+          <i class="bi bi-arrow-left me-2"></i>Voltar
+        </button>
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">
+          Cancelar
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal de Seleção de Vendedores -->
+<ng-template #modalVendedores let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="bi bi-people me-2"></i>Selecionar Vendedor
+    </h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (vendedores().length === 0) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando vendedores...</span>
+        </div>
+      </div>
+    } @else {
+      <div class="list-group">
+        @for (vendedor of vendedores(); track vendedor._id) {
+          <button
+            type="button"
+            class="list-group-item list-group-item-action"
+            (click)="selecionarVendedor(vendedor)"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">
+                  <i class="bi bi-person-fill me-2"></i>{{ vendedor.nome }}
+                </h6>
+                @if (vendedor.email) {
+                  <small class="text-muted">{{ vendedor.email }}</small>
+                }
+                @if (vendedor.telefone_principal?.valor) {
+                  <small class="text-muted ms-2">• {{ vendedor.telefone_principal.valor }}</small>
+                }
+              </div>
+              <i class="bi bi-arrow-right-circle text-primary"></i>
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      Fechar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal do Mapa do Empreendimento -->
+<ng-template #mapaModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="bi bi-map me-2"></i>Mapa do Empreendimento - {{ loteamentoSelecionado()?.nome }}
+    </h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body p-0" style="height: 80vh;">
+    @if (isMapaPDF()) {
+      <iframe
+        [src]="getSafeMapaUrl()"
+        style="width: 100%; height: 100%; border: none;"
+        title="Mapa do Empreendimento"
+      ></iframe>
+    } @else {
+      <div class="d-flex justify-content-center align-items-center h-100 bg-light">
+        <img
+          [src]="getMapaEmpreendimentoUrl()"
+          alt="Mapa do Empreendimento"
+          class="img-fluid"
+          style="max-height: 100%; max-width: 100%; object-fit: contain;"
+        />
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <a
+      [href]="getMapaEmpreendimentoUrl()"
+      target="_blank"
+      class="btn btn-primary"
+    >
+      <i class="bi bi-download me-1"></i>Baixar/Abrir em Nova Aba
+    </a>
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      Fechar
+    </button>
+  </div>
+</ng-template>

@@ -1,0 +1,19 @@
+<div class="alert-container">
+  @for (alert of alerts(); track alert) {
+    <div
+      class="alert alert-{{ alert.type }} alert-dismissible fade show d-flex align-items-center"
+      [class.removing]="isRemoving(alert)"
+      (click)="removeAlert(alert)"
+      role="alert"
+    >
+      <i class="me-2"
+         [ngClass]="{
+           'bi-check-circle-fill': alert.type === 'success',
+           'bi-exclamation-triangle-fill': alert.type === 'warning',
+           'bi-x-circle-fill': alert.type === 'danger'
+         }"
+      ></i>
+      <span class="ms-2">{{ alert.message }}</span>
+    </div>
+  }
+</div>

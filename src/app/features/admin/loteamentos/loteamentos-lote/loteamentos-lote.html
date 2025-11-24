@@ -1,0 +1,292 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+      @if (loteamentoSelecionado()) {
+        <i class="bi bi-arrow-left me-2" role="button" (click)="voltarParaSelecao()"></i>
+        Lotes - {{ loteamentoSelecionado()?.nome }}
+      } @else {
+        Gerenciar Lotes
+      }
+    </h2>
+  </div>
+
+  <!-- Seleção de Loteamento -->
+  @if (!loteamentoSelecionado()) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Selecione um Loteamento</h5>
+          </div>
+          <div class="card-body">
+            @if (loading()) {
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2">Carregando loteamentos...</p>
+              </div>
+            } @else if (loteamentos().length === 0) {
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Nenhum loteamento cadastrado.
+              </div>
+            } @else {
+              <div class="row g-3">
+                @for (loteamento of loteamentos(); track loteamento._id) {
+                  <div class="col-md-6 col-lg-4">
+                    <div 
+                      class="card h-100 shadow-sm cursor-pointer hover-shadow"
+                      (click)="selecionarLoteamento(loteamento)"
+                      style="cursor: pointer; transition: all 0.3s;"
+                    >
+                      <div class="card-body">
+                        <h5 class="card-title">{{ loteamento.nome }}</h5>
+                        @if (loteamento.municipio) {
+                          <p class="card-text text-muted mb-0">
+                            <i class="bi bi-geo-alt me-1"></i>
+                            {{ loteamento.municipio }}
+                          </p>
+                        }
+                      </div>
+                      <div class="card-footer bg-transparent">
+                        <small class="text-muted">
+                          <i class="bi bi-arrow-right-circle me-1"></i>
+                          Clique para visualizar lotes
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Visualização de Lotes Agrupados por Quadra -->
+  @if (loteamentoSelecionado()) {
+    @if (loadingLotes()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2">Carregando lotes...</p>
+      </div>
+    } @else if (quadrasAgrupadas().length === 0) {
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Nenhum lote cadastrado para este loteamento.
+      </div>
+    } @else {
+      <!-- Resumo Geral -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-bar-chart me-2"></i>
+                Resumo Geral do Loteamento
+              </h5>
+            </div>
+            <div class="card-body">
+              <!-- Resumo Quantitativo -->
+              <div class="row mb-4">
+                <div class="col-md-3">
+                  <div class="card text-center h-100 border-secondary">
+                    <div class="card-body">
+                      <h2 class="text-secondary mb-2">{{ resumoGeral.total }}</h2>
+                      <p class="mb-0 text-muted">Total de Lotes</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card text-center h-100 border-success">
+                    <div class="card-body">
+                      <h2 class="text-success mb-2">{{ resumoGeral.disponiveis }}</h2>
+                      <p class="mb-0 text-muted">Disponíveis</p>
+                      <small class="text-muted">{{ (resumoGeral.disponiveis / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card text-center h-100 border-warning">
+                    <div class="card-body">
+                      <h2 class="text-warning mb-2">{{ resumoGeral.reservados }}</h2>
+                      <p class="mb-0 text-muted">Reservados</p>
+                      <small class="text-muted">{{ (resumoGeral.reservados / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card text-center h-100 border-danger">
+                    <div class="card-body">
+                      <h2 class="text-danger mb-2">{{ resumoGeral.vendidos }}</h2>
+                      <p class="mb-0 text-muted">Vendidos</p>
+                      <small class="text-muted">{{ (resumoGeral.vendidos / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resumo Financeiro -->
+              <div class="row">
+                <div class="col-12">
+                  <h6 class="mb-3">Valores Financeiros:</h6>
+                </div>
+                <div class="col-md-6">
+                  <div class="card bg-light">
+                    <div class="card-body">
+                      <h6 class="card-title">Entrada</h6>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-success">Disponíveis:</span>
+                        <strong class="text-success">{{ formatarValor(valoresResumo.entradaDisponiveis) }}</strong>
+                      </div>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-warning">Reservados:</span>
+                        <strong class="text-warning">{{ formatarValor(valoresResumo.entradaReservados) }}</strong>
+                      </div>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-danger">Vendidos:</span>
+                        <strong class="text-danger">{{ formatarValor(valoresResumo.entradaVendidos) }}</strong>
+                      </div>
+                      <hr>
+                      <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Total Entrada:</span>
+                        <strong class="text-primary fs-5">{{ formatarValor(valoresResumo.entradaGeral) }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card bg-light">
+                    <div class="card-body">
+                      <h6 class="card-title">Valor Total</h6>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-success">Disponíveis:</span>
+                        <strong class="text-success">{{ formatarValor(valoresResumo.totalDisponiveis) }}</strong>
+                      </div>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-warning">Reservados:</span>
+                        <strong class="text-warning">{{ formatarValor(valoresResumo.totalReservados) }}</strong>
+                      </div>
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-danger">Vendidos:</span>
+                        <strong class="text-danger">{{ formatarValor(valoresResumo.totalVendidos) }}</strong>
+                      </div>
+                      <hr>
+                      <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Total Geral:</span>
+                        <strong class="text-primary fs-5">{{ formatarValor(valoresResumo.totalGeral) }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legenda de Situações -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h6 class="mb-3">Legenda:</h6>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+              <span class="badge bg-success me-2">D</span>
+              <span>Disponível</span>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="badge bg-warning text-dark me-2">R</span>
+              <span>Reservado</span>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="badge bg-danger me-2">V</span>
+              <span>Vendido</span>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="badge bg-secondary me-2">B</span>
+              <span>Bloqueado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quadras -->
+      @for (quadra of quadrasAgrupadas(); track quadra.quadra) {
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="bi bi-grid-3x3 me-2"></i>
+                Quadra {{ quadra.quadra }}
+              </h5>
+              <div class="d-flex gap-3">
+                <span class="badge bg-light text-dark">
+                  Total: {{ quadra.totalLotes }}
+                </span>
+                @if (quadra.lotesDisponiveis > 0) {
+                  <span class="badge bg-success">
+                    Disponíveis: {{ quadra.lotesDisponiveis }}
+                  </span>
+                }
+                @if (quadra.lotesReservados > 0) {
+                  <span class="badge bg-warning text-dark">
+                    Reservados: {{ quadra.lotesReservados }}
+                  </span>
+                }
+                @if (quadra.lotesVendidos > 0) {
+                  <span class="badge bg-danger">
+                    Vendidos: {{ quadra.lotesVendidos }}
+                  </span>
+                }
+                @if (quadra.lotesBloqueados > 0) {
+                  <span class="badge bg-secondary">
+                    Bloqueados: {{ quadra.lotesBloqueados }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row g-2">
+              @for (lote of quadra.lotes; track lote._id) {
+                <div class="col-auto">
+                  <div 
+                    class="card text-center shadow-sm"
+                    style="min-width: 100px;"
+                  >
+                    <div class="card-header py-1" [ngClass]="getSituacaoClass(lote.situacao)">
+                      <strong class="text-white">{{ lote.lote }}</strong>
+                    </div>
+                    <div class="card-body p-2">
+                      <small class="d-block text-muted">Área</small>
+                      <strong>{{ lote.area }}m²</strong>
+                      <hr class="my-1">
+                      <small class="d-block text-muted">Entrada</small>
+                      <strong class="text-success">{{ formatarValor(lote.valor_entrada) }}</strong>
+                      <hr class="my-1">
+                      <small class="d-block text-muted">Valor Total</small>
+                      <strong class="text-primary">{{ formatarValor(lote.valor_total) }}</strong>
+                      @if (lote.reserva) {
+                        <hr class="my-1">
+                        <small class="d-block text-muted">Reservado por:</small>
+                        <small class="d-block fw-bold">{{ lote.reserva.usuario.nome }}</small>
+                      }
+                    </div>
+                    <div class="card-footer p-1 bg-light">
+                      <small class="text-muted">{{ getSituacaoTexto(lote.situacao) }}</small>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

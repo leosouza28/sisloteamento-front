@@ -1,0 +1,391 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="mb-0">Detalhes da Reserva</h2>
+      @if (reserva()?.codigo_reserva) {
+        <p class="text-muted mb-0">Código: <strong>{{ reserva()?.codigo_reserva }}</strong></p>
+      }
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-secondary" (click)="voltar()">
+        <i class="bi bi-arrow-left me-2"></i>Voltar
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+  } @else if (reserva()) {
+    @if (isReservaCancelada()) {
+      <div class="alert alert-danger" role="alert">
+        <h5 class="alert-heading">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Reserva Cancelada
+        </h5>
+        <p class="mb-0">Esta reserva foi cancelada e não é possível realizar nenhuma operação.</p>
+      </div>
+    }
+
+    <!-- Informações do Loteamento -->
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Loteamento</h5>
+      </div>
+      <div class="card-body">
+        <h4>{{ reserva()?.loteamento?.nome }}</h4>
+      </div>
+    </div>
+
+    <!-- Informações do Cliente -->
+    <div class="card mb-3">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-person-fill me-2"></i>Cliente</h5>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong class="text-muted d-block mb-1">Nome:</strong>
+            <p class="mb-0">{{ reserva()?.cliente?.nome }}</p>
+          </div>
+          <div class="col-md-3">
+            <strong class="text-muted d-block mb-1">CPF:</strong>
+            <p class="mb-0">{{ reserva()?.cliente?.documento }}</p>
+          </div>
+          <div class="col-md-3">
+            <strong class="text-muted d-block mb-1">Sexo:</strong>
+            <p class="mb-0">{{ reserva()?.cliente?.sexo || 'Não informado' }}</p>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong class="text-muted d-block mb-1">E-mail:</strong>
+            <p class="mb-0">{{ reserva()?.cliente?.email || 'Não informado' }}</p>
+          </div>
+          <div class="col-md-3">
+            <strong class="text-muted d-block mb-1">Telefone:</strong>
+            <p class="mb-0">{{ reserva()?.cliente?.telefone_principal?.valor || 'Não informado' }}</p>
+          </div>
+          <div class="col-md-3">
+            <strong class="text-muted d-block mb-1">Data de Nascimento:</strong>
+            <p class="mb-0">{{ reserva()?.cliente?.data_nascimento | date:'dd/MM/yyyy' }}</p>
+          </div>
+        </div>
+
+        @if (reserva()?.cliente?.endereco) {
+          <hr>
+          <h6 class="text-muted mb-3">Endereço</h6>
+          <div class="row mb-2">
+            <div class="col-md-9">
+              <strong class="text-muted d-block mb-1">Logradouro:</strong>
+              <p class="mb-0">
+                {{ reserva()?.cliente?.endereco?.logradouro }}
+                @if (reserva()?.cliente?.endereco?.numero) {
+                  , {{ reserva()?.cliente?.endereco?.numero }}
+                }
+                @if (reserva()?.cliente?.endereco?.complemento) {
+                  - {{ reserva()?.cliente?.endereco?.complemento }}
+                }
+              </p>
+            </div>
+            <div class="col-md-3">
+              <strong class="text-muted d-block mb-1">CEP:</strong>
+              <p class="mb-0">{{ reserva()?.cliente?.endereco?.cep || 'Não informado' }}</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <strong class="text-muted d-block mb-1">Bairro:</strong>
+              <p class="mb-0">{{ reserva()?.cliente?.endereco?.bairro || 'Não informado' }}</p>
+            </div>
+            <div class="col-md-4">
+              <strong class="text-muted d-block mb-1">Cidade:</strong>
+              <p class="mb-0">{{ reserva()?.cliente?.endereco?.cidade || 'Não informado' }}</p>
+            </div>
+            <div class="col-md-4">
+              <strong class="text-muted d-block mb-1">UF:</strong>
+              <p class="mb-0">{{ reserva()?.cliente?.endereco?.estado || 'N/A' }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Informações do Vendedor -->
+    <div class="card mb-3">
+      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Vendedor</h5>
+        @if (!isReservaCancelada()) {
+          <button 
+            class="btn btn-light btn-sm"
+            (click)="abrirModalAlterarVendedor(modalVendedores)"
+            [disabled]="atualizandoVendedor()"
+          >
+            <i class="bi bi-pencil me-1"></i>Alterar Vendedor
+          </button>
+        }
+      </div>
+      <div class="card-body">
+        @if (reserva()?.vendedor?.nome) {
+          <div class="row">
+            <div class="col-md-6">
+              <strong class="text-muted d-block mb-1">Nome:</strong>
+              <p class="mb-0">{{ reserva()?.vendedor?.nome }}</p>
+            </div>
+            <div class="col-md-6">
+              <strong class="text-muted d-block mb-1">CPF:</strong>
+              <p class="mb-0">{{ reserva()?.vendedor?.documento }}</p>
+            </div>
+          </div>
+        } @else {
+          <p class="text-muted mb-0">Nenhum vendedor associado a esta reserva.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Lotes Reservados -->
+    <div class="card mb-3">
+      <div class="card-header bg-warning text-white">
+        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Lotes Reservados</h5>
+      </div>
+      <div class="card-body">
+        @if (reserva()?.lotes && reserva()!.lotes!.length > 0) {
+          <div class="row">
+            @for (lote of reserva()!.lotes; track lote._id) {
+              <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100 border-2" [ngClass]="{
+                  'border-success': lote.situacao === 'DISPONIVEL',
+                  'border-warning': lote.situacao === 'RESERVADO',
+                  'border-danger': lote.situacao === 'VENDIDO'
+                }">
+                  <div class="card-header d-flex justify-content-between align-items-center" [ngClass]="{
+                    'bg-success text-white': lote.situacao === 'DISPONIVEL',
+                    'bg-warning text-dark': lote.situacao === 'RESERVADO',
+                    'bg-danger text-white': lote.situacao === 'VENDIDO'
+                  }">
+                    <h6 class="mb-0 text-white">
+                      <i class="bi bi-geo-alt-fill me-1"></i>
+                      Quadra {{ lote.quadra }} - Lote {{ lote.lote }}
+                    </h6>
+                    <span class="badge" [ngClass]="{
+                      'bg-white text-success': lote.situacao === 'DISPONIVEL',
+                      'bg-white text-warning': lote.situacao === 'RESERVADO',
+                      'bg-white text-danger': lote.situacao === 'VENDIDO'
+                    }">
+                      {{ lote.situacao }}
+                    </span>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-2">
+                      <small class="text-muted d-block">Área</small>
+                      <strong>{{ lote.area | number:'1.2-2' }} m²</strong>
+                    </div>
+                    <div class="mb-2">
+                      <small class="text-muted d-block">Valor/m²</small>
+                      <strong>{{ lote.valor_area | currency:'BRL' }}</strong>
+                    </div>
+                    <div class="mb-2">
+                      <small class="text-muted d-block">Valor de Entrada</small>
+                      <strong class="text-success fs-5">{{ lote.valor_entrada | currency:'BRL' }}</strong>
+                    </div>
+                    <div class="mb-2">
+                      <small class="text-muted d-block">Valor Total</small>
+                      <strong class="text-primary fs-5">{{ lote.valor_total | currency:'BRL' }}</strong>
+                    </div>
+                    @if (!isReservaCancelada()) {
+                      <div class="d-grid">
+                        @if (lote.situacao === 'RESERVADO') {
+                          <button
+                            class="btn btn-danger btn-sm"
+                            (click)="abrirModalConfirmarAlteracaoLote(modalConfirmarAlteracaoLote, lote, 'VENDIDO')"
+                            [disabled]="atualizandoLote() === lote._id"
+                          >
+                            @if (atualizandoLote() === lote._id) {
+                              <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            <i class="bi bi-check-circle me-1"></i>Marcar como Vendido
+                          </button>
+                        } @else if (lote.situacao === 'VENDIDO') {
+                          <button
+                            class="btn btn-warning btn-sm"
+                            (click)="abrirModalConfirmarAlteracaoLote(modalConfirmarAlteracaoLote, lote, 'RESERVADO')"
+                            [disabled]="atualizandoLote() === lote._id"
+                          >
+                            @if (atualizandoLote() === lote._id) {
+                              <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Voltar para Reservado
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="card bg-light mt-3">
+            <div class="card-body">
+              <div class="row">
+                <div class="col text-end">
+                  <h5 class="mb-0">Valor Total: <span class="text-primary">{{ getValorTotalLotes() | currency:'BRL' }}</span></h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <p class="text-muted mb-0">Nenhum lote associado a esta reserva.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Informações de Auditoria -->
+    <div class="card mb-3">
+      <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Histórico</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <strong class="text-muted d-block mb-1">Criado em:</strong>
+            <p class="mb-0">{{ reserva()?.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+            @if (reserva()?.criado_por?.usuario?.nome) {
+              <small class="text-muted">Por: {{ reserva()?.criado_por?.usuario?.nome }}</small>
+            }
+          </div>
+          <div class="col-md-6">
+            <strong class="text-muted d-block mb-1">Última atualização:</strong>
+            <p class="mb-0">{{ reserva()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+            @if (reserva()?.atualizado_por?.usuario?.nome) {
+              <small class="text-muted">Por: {{ reserva()?.atualizado_por?.usuario?.nome }}</small>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    @if (!isReservaCancelada()) {
+      <div class="d-flex justify-content-end gap-2 mb-4">
+        <button 
+          class="btn btn-danger" 
+          (click)="abrirModalConfirmarCancelamento(modalConfirmarCancelamento)"
+          [disabled]="cancelando() || loading()"
+        >
+          @if (cancelando()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          <i class="bi bi-x-circle me-2"></i>Cancelar Reserva
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal de Seleção de Vendedor -->
+<ng-template #modalVendedores let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="bi bi-people me-2"></i>Alterar Vendedor
+    </h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (vendedores().length === 0) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando vendedores...</span>
+        </div>
+      </div>
+    } @else {
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Selecione o novo vendedor para esta reserva.
+      </div>
+      <div class="list-group">
+        @for (vendedor of vendedores(); track vendedor._id) {
+          <button
+            type="button"
+            class="list-group-item list-group-item-action"
+            (click)="alterarVendedor(vendedor)"
+            [disabled]="atualizandoVendedor()"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">
+                  <i class="bi bi-person-fill me-2"></i>{{ vendedor.nome }}
+                </h6>
+                @if (vendedor.email) {
+                  <small class="text-muted">{{ vendedor.email }}</small>
+                }
+                @if (vendedor.telefone_principal?.valor) {
+                  <small class="text-muted ms-2">• {{ vendedor.telefone_principal.valor }}</small>
+                }
+              </div>
+              @if (!atualizandoVendedor()) {
+                <i class="bi bi-arrow-right-circle text-primary"></i>
+              } @else {
+                <span class="spinner-border spinner-border-sm text-primary"></span>
+              }
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()" [disabled]="atualizandoVendedor()">
+      Fechar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal de Confirmação de Alteração de Lote -->
+<ng-template #modalConfirmarAlteracaoLote let-modal>
+  <div class="modal-header bg-warning text-dark">
+    <h5 class="modal-title">
+      <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Alteração
+    </h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-0">Confirma a alteração da situação deste lote?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-primary" (click)="modal.close('confirmar')">
+      Confirmar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal de Confirmação de Cancelamento -->
+<ng-template #modalConfirmarCancelamento let-modal>
+  <div class="modal-header bg-danger text-white">
+    <h5 class="modal-title">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>Cancelar Reserva
+    </h5>
+    <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-circle me-2"></i>
+      <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+    </div>
+    <p class="mb-2">Tem certeza que deseja <strong>CANCELAR</strong> esta reserva?</p>
+    <p class="mb-0 text-muted">Todos os lotes voltarão para a situação DISPONÍVEL.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      Não, voltar
+    </button>
+    <button type="button" class="btn btn-danger" (click)="modal.close('confirmar')">
+      <i class="bi bi-x-circle me-1"></i>Sim, cancelar reserva
+    </button>
+  </div>
+</ng-template>

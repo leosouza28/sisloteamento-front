@@ -1,0 +1,375 @@
+<div [ngClass]="modalMode ? '' : 'container-fluid'">
+  @if (!modalMode) {
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="mb-0">{{ usuarioId() ? 'Editar Usuário' : clienteOnly ? 'Novo Cliente' : 'Novo Usuário' }}</h2>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="salvar()">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0">Dados Básicos</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 mb-3">
+              <label class="form-label">Nome <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                placeholder="Digite o nome completo"
+              />
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="{{ clienteOnly ? 'col-md-12' : 'col-md-6' }} mb-3">
+              <label class="form-label">CPF <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="documento"
+                mask="000.000.000-00"
+                placeholder="000.000.000-00"
+              />
+            </div>
+            @if (!clienteOnly) {
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Status <span class="text-danger">*</span></label>
+                <select class="form-select" formControlName="status">
+                  <option value="ATIVO">Ativo</option>
+                  <option value="BLOQUEADO">Bloqueado</option>
+                </select>
+              </div>
+            }
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label">E-mail</label>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="email"
+                placeholder="exemplo@email.com"
+              />
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Data de Nascimento</label>
+              <input
+                type="date"
+                class="form-control"
+                formControlName="data_nascimento"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Sexo</label>
+              <select class="form-select" formControlName="sexo">
+                <option value="">Selecione o sexo</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="FEMININO">Feminino</option>
+                <option value="NAO BINARIO">Não Binário</option>
+                <option value="NAO INFORMADO">Não Informado</option>
+              </select>
+            </div>
+          </div>
+
+          @if (!clienteOnly) {
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Senha {{ usuarioId() ? '(deixe em branco para não alterar)' : '*' }}</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  formControlName="senha"
+                  placeholder="{{ usuarioId() ? 'Digite uma nova senha para alterar' : 'Digite uma senha forte' }}"
+                />
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (!clienteOnly) {
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0">Níveis de Acesso</h5>
+          </div>
+          <div class="card-body">
+            <div class="form-check mb-2">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                formControlName="nivel_cliente"
+                id="nivel_cliente"
+              />
+              <label class="form-check-label" for="nivel_cliente">Cliente</label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                formControlName="nivel_vendedor"
+                id="nivel_vendedor"
+              />
+              <label class="form-check-label" for="nivel_vendedor">Vendedor</label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                formControlName="nivel_admin"
+                id="nivel_admin"
+              />
+              <label class="form-check-label" for="nivel_admin">Administrador</label>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (isAdmin) {
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0">Permissões</h5>
+          </div>
+          <div class="card-body p-0">
+            @for (secao of getSecoes(); track secao) {
+              <div>
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th class="text-white" colspan="2">{{ permissoesAgrupadas()[secao].nome }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (permissao of permissoesAgrupadas()[secao].permissoes; track permissao.key) {
+                        <tr>
+                          <td style="width: 50px" class="text-center">
+                            <input
+                              type="checkbox"
+                              class="form-check-input"
+                              [checked]="hasScope(permissao.key)"
+                              (change)="toggleScope(permissao.key)"
+                              [id]="'scope_' + permissao.key"
+                            />
+                          </td>
+                          <td>
+                            <label class="form-check-label mb-0" [for]="'scope_' + permissao.key" style="cursor: pointer">
+                              {{ permissao.description }}
+                            </label>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Telefones</h5>
+          <button type="button" class="btn btn-sm btn-primary" (click)="adicionarTelefone()">
+            <i class="bi bi-plus-circle me-1"></i>Adicionar
+          </button>
+        </div>
+        <div class="card-body">
+          @if (telefones.length === 0) {
+            <p class="text-muted">Nenhum telefone cadastrado</p>
+          } @else {
+            <div formArrayName="telefones">
+              @for (telefone of telefones.controls; track $index) {
+                <div [formGroupName]="$index" class="mb-4">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Tipo</label>
+                      <select class="form-select" formControlName="tipo">
+                        <option value="CEL_WHATSAPP">Celular WhatsApp</option>
+                        <option value="WHATSAPP">WhatsApp</option>
+                        <option value="CELULAR">Celular</option>
+                        <option value="FIXO">Fixo</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Número</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="valor"
+                        placeholder="(00) 00000-0000"
+                        [mask]="telefone.get('tipo')?.value === 'FIXO' ? '(00) 0000-0000' : '(00) 00000-0000'"
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-8">
+                      <div class="form-check">
+                        <input
+                          type="radio"
+                          class="form-check-input"
+                          [checked]="telefone.get('principal')?.value"
+                          (change)="marcarTelefonePrincipal($index)"
+                          name="principal"
+                          [id]="'principal_' + $index"
+                        />
+                        <label class="form-check-label" [for]="'principal_' + $index">
+                          Marcar como principal
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-4 text-end">
+                      <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        (click)="removerTelefone($index)"
+                      >
+                        <i class="bi bi-trash me-1"></i>Remover
+                      </button>
+                    </div>
+                  </div>
+                  @if ($index < telefones.length - 1) {
+                    <hr class="my-3">
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0">Endereço</h5>
+        </div>
+        <div class="card-body" formGroupName="endereco">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">CEP</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="cep"
+                  placeholder="00000-000"
+                  mask="00000-000"
+                />
+                @if (buscandoCep()) {
+                  <span class="input-group-text">
+                    <span class="spinner-border spinner-border-sm"></span>
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Logradouro</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="logradouro"
+                placeholder="Rua, Avenida, etc."
+              />
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Número</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="numero"
+                placeholder="123"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Complemento</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="complemento"
+                placeholder="Apto, Bloco, Sala, etc."
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Bairro</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="bairro"
+                placeholder="Nome do bairro"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Cidade</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="cidade"
+                placeholder="Nome da cidade"
+              />
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">UF</label>
+              <input
+                type="text"
+                class="form-control text-uppercase"
+                formControlName="estado"
+                placeholder="SP"
+                maxlength="2"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @if (!modalMode) {
+        <div class="d-flex gap-2 mb-4">
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            <i class="bi bi-save me-2"></i>Salvar
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="voltar()">
+            <i class="bi bi-arrow-left me-2"></i>Voltar
+          </button>
+        </div>
+      } @else {
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="voltar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-success" [disabled]="saving()">
+            @if (saving()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            <i class="bi bi-check-circle me-2"></i>{{ clienteOnly ? 'Cadastrar Cliente' : 'Salvar' }}
+          </button>
+        </div>
+      }
+    </form>
+  }
+</div>

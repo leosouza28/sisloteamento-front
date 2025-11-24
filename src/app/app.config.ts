@@ -2,11 +2,30 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChang
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
+import { provideHttpClient } from '@angular/common/http';
+import { provideEnvironmentNgxMask } from 'ngx-mask';
+import { NgxCurrencyInputMode, provideEnvironmentNgxCurrency } from 'ngx-currency';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes)
+    provideRouter(routes),
+    provideHttpClient(),
+    provideEnvironmentNgxMask(),
+    provideEnvironmentNgxCurrency({
+      align: "right",
+      allowNegative: true,
+      allowZero: true,
+      decimal: ",",
+      precision: 2,
+      prefix: "R$ ",
+      suffix: "",
+      thousands: ".",
+      nullable: true,
+      min: null,
+      max: null,
+      inputMode: NgxCurrencyInputMode.Financial,
+    })
   ]
 };

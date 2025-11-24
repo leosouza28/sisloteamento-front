@@ -1,0 +1,42 @@
+.hover-shadow {
+  &:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-2px);
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.card-header {
+  &.bg-success,
+  &.bg-warning,
+  &.bg-danger,
+  &.bg-secondary {
+    color: white;
+    
+    strong {
+      font-size: 1.1rem;
+    }
+  }
+
+  &.bg-warning {
+    color: #000 !important;
+  }
+}
+
+// Responsividade dos cards de lotes
+@media (max-width: 768px) {
+  .col-auto {
+    flex: 0 0 auto;
+    width: calc(50% - 0.5rem);
+  }
+}
+
+@media (max-width: 576px) {
+  .col-auto {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}

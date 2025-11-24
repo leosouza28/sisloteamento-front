@@ -1,0 +1,119 @@
+<nav class="navbar navbar-expand-lg bg-primary d-block d-lg-none shadow-sm border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" [routerLink]="['/admin/inicio']"
+            [ngStyle]="{ 'background-image': 'url(' + environment.logoPath + ')' }"></a>
+        <button class="navbar-toggler" type="button" (click)="openMenu(content)"
+            style="background-color: var(--bs-white); border-color: var(--bs-secondary);">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="bg-content">
+    <div class="sidebar shadow-sm border p-3">
+        <div class="sidebar-header" [ngStyle]="{ 'background-image': 'url(' + environment.logoPath + ')' }"></div>
+
+        <div *ngIf="logged_user" class="d-flex flex-column mb-3 text-center align-items-center">
+            <p class="mb-2 fw-bold text-muted">Operador</p>
+            <img *ngIf="!!logged_user?.img" [src]="logged_user.img" class="rounded-circle mb-2" style="width: 3.2rem; height: 3.2rem;">
+            <p class="mb-0 fw-bold">{{logged_user.nome}}</p>
+            <p class="mb-0 text-muted">{{logged_user.cpf_cnpj | cpfCnpj}}</p>
+            <ng-container *ngIf="!!logged_user?.perfil_nome">
+                <div class="text-center border-top pt-1 mt-1">
+                    <p class="mb-0 text-muted">{{logged_user.perfil_nome}}</p>
+                </div>
+            </ng-container>
+        </div>
+
+        <ul class="nav flex-column gap-2 mb-3">
+            <li class="nav-item rounded shadow-sm" *ngFor="let item of menu">
+                <a class="nav-link d-flex justify-content-between align-items-center"
+                    (click)="$event.preventDefault() ; toggleSubmenu(item);" href="javascript:void(0)"
+                    [routerLink]="!item.submenu && item?.link ? [item.link] : null">
+                    <span class="">
+                        <i [ngClass]="item.icon"></i> {{item.nome}}
+                    </span>
+                    <i *ngIf="item.submenu" class="bi"
+                        [ngClass]="{'bi-chevron-down': item.open, 'bi-chevron-right': !item.open}"></i>
+                </a>
+                <!-- Submenu -->
+                <ul [ngClass]="{'submenu': true, 'open': item.open}" class="nav flex-column ms-0 bg-warning-subtle">
+                    <li class="nav-item" *ngFor="let subItem of item.submenu">
+                        <a class="nav-link " href="javascript:void(0)" [routerLink]="[subItem.link]">
+                            <i [ngClass]="subItem.icon"></i> {{subItem.nome}}
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="d-flex flex-column align-items-center">
+            <!-- <button id="btn-atualizar-sessao-1" class="btn btn-link btn-sm" style="text-decoration: none;"
+                (click)="atualizarSessao()" *ngIf="!atualizando_sessao">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar sessão
+            </button> -->
+            <small>{{version}}</small>
+            <small class="d-flex align-items-center text-success" *ngIf="atualizando_sessao">
+                <div class="spinner-border me-2 spinner-grow-sm" aria-hidden="true"></div>
+                <strong role="status">Atualizando sessão</strong>
+            </small>
+        </div>
+    </div>
+
+    <router-outlet></router-outlet>
+</div>
+
+<ng-template #content let-offcanvas>
+    <div class="offcanvas-header">
+        <h4 class="offcanvas-title">Menu</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss('Cross click')"></button>
+    </div>
+
+    <div class="offcanvas-body">
+
+        <div *ngIf="logged_user" class="d-flex flex-column mb-3 align-items-center text-center">
+            <p class="mb-2 fw-bold text-muted">Operador</p>
+            <img *ngIf="!!logged_user?.img" [src]="logged_user.img" class="rounded-circle mb-2" style="width: 3.2rem; height: 3.2rem;">
+            <p class="mb-0 fw-bold">{{logged_user.nome}}</p>
+            <p class="mb-0 text-muted">{{logged_user.cpf_cnpj | cpfCnpj}}</p>
+            <ng-container *ngIf="!!logged_user?.perfil_nome">
+                <div class="text-center border-top pt-1 mt-1">
+                    <p class="mb-0 text-muted">{{logged_user.perfil_nome}}</p>
+                </div>
+            </ng-container>
+        </div>
+
+        <ul class="nav flex-column gap-2 mb-3">
+            <li class="nav-item rounded shadow-sm" *ngFor="let item of menu">
+                <a class="nav-link d-flex justify-content-between align-items-center text-dark"
+                    (click)="$event.preventDefault() ; toggleSubmenu(item);" href="javascript:void(0)"
+                    [routerLink]="!item.submenu && item?.link ? [item.link] : null">
+                    <span class="">
+                        <i [ngClass]="item.icon"></i> {{item.nome}}
+                    </span>
+                    <i *ngIf="item.submenu" class="bi"
+                        [ngClass]="{'bi-chevron-down': item.open, 'bi-chevron-right': !item.open}"></i>
+                </a>
+                <!-- Submenu -->
+                <ul [ngClass]="{'submenu': true, 'open': item.open}" class="nav flex-column ms-0 bg-warning-subtle">
+                    <li class="nav-item" *ngFor="let subItem of item.submenu">
+                        <a class="nav-link " href="javascript:void(0)" [routerLink]="[subItem.link]">
+                            <i [ngClass]="subItem.icon"></i> {{subItem.nome}}
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <div class="d-flex flex-column align-items-center">
+            <!-- <button id="btn-atualizar-sessao-1" class="btn btn-link btn-sm" style="text-decoration: none;"
+                (click)="atualizarSessao()" *ngIf="!atualizando_sessao">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar sessão
+            </button> -->
+            <small>{{version}}</small>
+            <small class="d-flex align-items-center text-success" *ngIf="atualizando_sessao">
+                <div class="spinner-border me-2 spinner-grow-sm" aria-hidden="true"></div>
+                <strong role="status">Atualizando sessão</strong>
+            </small>
+        </div>
+    </div>
+</ng-template>

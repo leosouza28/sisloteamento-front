@@ -1,0 +1,141 @@
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="mb-0">Importar Lotes</h2>
+            @if (loteamentoNome()) {
+            <p class="text-muted mb-0">Loteamento: <strong>{{ loteamentoNome() }}</strong></p>
+            }
+        </div>
+    </div>
+
+    @if (loading()) {
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+    } @else {
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="mb-0">1. Selecionar Arquivo CSV</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Arquivo CSV</label>
+                <input type="file" class="form-control" accept=".csv" (change)="onFileSelected($event)" />
+                @if (arquivoNome()) {
+                <small class="text-muted">Arquivo selecionado: {{ arquivoNome() }}</small>
+                }
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Formato esperado do CSV:</strong><br>
+                QD,LT,MQ,VALOR_MQ,VALOR_BASE,ENTRADA<br>
+                <small class="text-muted">
+                    - QD: Quadra<br>
+                    - LT: Lote<br>
+                    - MQ: Área (m²)<br>
+                    - VALOR_MQ: Valor por m²<br>
+                    - VALOR_BASE: Valor total<br>
+                    - ENTRADA: Valor da entrada
+                </small>
+            </div>
+        </div>
+    </div>
+
+    @if (lotes.length > 0) {
+    <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">2. Resumo por Quadra</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @for (resumo of quadrasResumo; track resumo.quadra) {
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">Quadra {{ resumo.quadra }}</h6>
+                                <p class="mb-1"><strong>Lotes:</strong> {{ resumo.qtd }}</p>
+                                <p class="mb-1"><strong>Área Total:</strong> {{ resumo.areaTotal | moneyBrl }} m²</p>
+                                <p class="mb-0"><strong>Valor Total:</strong> {{ resumo.valorTotal | moneyBrl }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">3. Revisar Lotes ({{ lotes.length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px">Quadra</th>
+                                <th style="width: 80px">Lote</th>
+                                <th style="width: 120px">Área (m²)</th>
+                                <th style="width: 120px">Valor/m²</th>
+                                <th style="width: 140px">Valor Total</th>
+                                <th style="width: 140px">Entrada</th>
+                                <th style="width: 80px">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody formArrayName="lotes">
+                            @for (lote of lotes.controls; track $index) {
+                            <tr [formGroupName]="$index">
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" formControlName="quadra" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" formControlName="lote" />
+                                </td>
+                                <td>
+                                    <input class="form-control form-control-sm" formControlName="area" />
+                                </td>
+                                <td>
+                                    <input currencyMask class="form-control form-control-sm"
+                                        formControlName="valor_area" />
+                                </td>
+                                <td>
+                                    <input currencyMask class="form-control form-control-sm"
+                                        formControlName="valor_total" />
+                                </td>
+                                <td>
+                                    <input currencyMask class="form-control form-control-sm"
+                                        formControlName="entrada" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-danger" (click)="removerLote($index)"
+                                        title="Remover">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-success" [disabled]="saving()">
+                @if (saving()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                <i class="bi bi-check-circle me-2"></i>Salvar Todos os Lotes
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="voltar()">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </button>
+        </div>
+    </form>
+    }
+    }
+</div>

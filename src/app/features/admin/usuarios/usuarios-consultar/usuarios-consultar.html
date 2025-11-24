@@ -1,0 +1,124 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="mb-0">Usuários</h2>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary" (click)="novoUsuario()">
+        <i class="bi bi-plus-circle me-2"></i>Novo Usuário
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <input
+              #searchInput
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nome, CPF ou e-mail..."
+              [value]="searchTerm()"
+              (keyup.enter)="onSearch(searchInput.value)"
+            />
+            <button class="btn btn-outline-secondary" type="button" (click)="onSearch(searchInput.value)">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+          </div>
+        </div>
+      } @else {
+        @if (usuarios().length === 0) {
+          <div class="alert alert-info mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            Nenhum usuário encontrado.
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CPF/CNPJ</th>
+                  <th>E-mail</th>
+                  <th>Status</th>
+                  <th>Níveis</th>
+                  <th style="width: 100px">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (usuario of usuarios(); track usuario._id) {
+                  <tr>
+                    <td>{{ usuario.nome }}</td>
+                    <td>{{ usuario.documento }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>
+                      <span [ngClass]="getStatusClass(usuario.status)">
+                        {{ usuario.status }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (usuario.niveis && usuario.niveis.length > 0) {
+                        <span>{{ usuario.niveis.join(', ') }}</span>
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="editarUsuario(usuario._id)"
+                        title="Editar"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <nav class="mt-3">
+            <ul class="pagination justify-content-center mb-0">
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
+                  Anterior
+                </button>
+              </li>
+              @for (page of pages; track page) {
+                @if (page === -1) {
+                  <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                  </li>
+                } @else {
+                  <li class="page-item" [class.active]="currentPage() === page">
+                    <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+                  </li>
+                }
+              }
+              <li class="page-item" [class.disabled]="currentPage() === totalPages">
+                <button class="page-link" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages">
+                  Próximo
+                </button>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="text-center text-muted mt-2">
+            <small>Total de {{ totalItems() }} registro(s)</small>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
