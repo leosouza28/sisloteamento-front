@@ -82,7 +82,7 @@
       </div>
     } @else {
       <!-- Resumo Geral -->
-      <div class="row mb-4">
+      <div class="row row-gap-3 mb-4">
         <div class="col-12">
           <div class="card border-primary">
             <div class="card-header bg-primary text-white">
@@ -93,7 +93,7 @@
             </div>
             <div class="card-body">
               <!-- Resumo Quantitativo -->
-              <div class="row mb-4">
+              <div class="row mb-4 row-gap-4">
                 <div class="col-md-3">
                   <div class="card text-center h-100 border-secondary">
                     <div class="card-body">
@@ -103,27 +103,27 @@
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <div class="card text-center h-100 border-success">
+                  <div class="card text-center h-100 border-primary">
                     <div class="card-body">
-                      <h2 class="text-success mb-2">{{ resumoGeral.disponiveis }}</h2>
+                      <h2 class="text-primary mb-2">{{ resumoGeral.disponiveis }}</h2>
                       <p class="mb-0 text-muted">Disponíveis</p>
                       <small class="text-muted">{{ (resumoGeral.disponiveis / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <div class="card text-center h-100 border-warning">
+                  <div class="card text-center h-100 border-info">
                     <div class="card-body">
-                      <h2 class="text-warning mb-2">{{ resumoGeral.reservados }}</h2>
+                      <h2 class="text-info mb-2">{{ resumoGeral.reservados }}</h2>
                       <p class="mb-0 text-muted">Reservados</p>
                       <small class="text-muted">{{ (resumoGeral.reservados / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <div class="card text-center h-100 border-danger">
+                  <div class="card text-center h-100 border-success">
                     <div class="card-body">
-                      <h2 class="text-danger mb-2">{{ resumoGeral.vendidos }}</h2>
+                      <h2 class="text-success mb-2">{{ resumoGeral.vendidos }}</h2>
                       <p class="mb-0 text-muted">Vendidos</p>
                       <small class="text-muted">{{ (resumoGeral.vendidos / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
                     </div>
@@ -132,25 +132,25 @@
               </div>
 
               <!-- Resumo Financeiro -->
-              <div class="row">
+              <div class="row row-gap-3">
                 <div class="col-12">
-                  <h6 class="mb-3">Valores Financeiros:</h6>
+                  <h6 >Valores Financeiros:</h6>
                 </div>
                 <div class="col-md-6">
                   <div class="card bg-light">
                     <div class="card-body">
                       <h6 class="card-title">Entrada</h6>
                       <div class="d-flex justify-content-between mb-2">
-                        <span class="text-success">Disponíveis:</span>
-                        <strong class="text-success">{{ formatarValor(valoresResumo.entradaDisponiveis) }}</strong>
+                        <span class="text-primary">Disponíveis:</span>
+                        <strong class="text-primary">{{ formatarValor(valoresResumo.entradaDisponiveis) }}</strong>
                       </div>
                       <div class="d-flex justify-content-between mb-2">
-                        <span class="text-warning">Reservados:</span>
-                        <strong class="text-warning">{{ formatarValor(valoresResumo.entradaReservados) }}</strong>
+                        <span class="text-info">Reservados:</span>
+                        <strong class="text-info">{{ formatarValor(valoresResumo.entradaReservados) }}</strong>
                       </div>
                       <div class="d-flex justify-content-between mb-2">
-                        <span class="text-danger">Vendidos:</span>
-                        <strong class="text-danger">{{ formatarValor(valoresResumo.entradaVendidos) }}</strong>
+                        <span class="text-success">Vendidos:</span>
+                        <strong class="text-success">{{ formatarValor(valoresResumo.entradaVendidos) }}</strong>
                       </div>
                       <hr>
                       <div class="d-flex justify-content-between">
@@ -165,16 +165,16 @@
                     <div class="card-body">
                       <h6 class="card-title">Valor Total</h6>
                       <div class="d-flex justify-content-between mb-2">
-                        <span class="text-success">Disponíveis:</span>
-                        <strong class="text-success">{{ formatarValor(valoresResumo.totalDisponiveis) }}</strong>
+                        <span class="text-primary">Disponíveis:</span>
+                        <strong class="text-primary">{{ formatarValor(valoresResumo.totalDisponiveis) }}</strong>
                       </div>
                       <div class="d-flex justify-content-between mb-2">
-                        <span class="text-warning">Reservados:</span>
-                        <strong class="text-warning">{{ formatarValor(valoresResumo.totalReservados) }}</strong>
+                        <span class="text-info">Reservados:</span>
+                        <strong class="text-info">{{ formatarValor(valoresResumo.totalReservados) }}</strong>
                       </div>
                       <div class="d-flex justify-content-between mb-2">
-                        <span class="text-danger">Vendidos:</span>
-                        <strong class="text-danger">{{ formatarValor(valoresResumo.totalVendidos) }}</strong>
+                        <span class="text-success">Vendidos:</span>
+                        <strong class="text-success">{{ formatarValor(valoresResumo.totalVendidos) }}</strong>
                       </div>
                       <hr>
                       <div class="d-flex justify-content-between">
@@ -196,19 +196,19 @@
           <h6 class="mb-3">Legenda:</h6>
           <div class="d-flex flex-wrap gap-3">
             <div class="d-flex align-items-center">
-              <span class="badge bg-success me-2">D</span>
+              <span class="badge bg-primary me-2">D</span>
               <span>Disponível</span>
             </div>
             <div class="d-flex align-items-center">
-              <span class="badge bg-warning text-dark me-2">R</span>
+              <span class="badge bg-info text-dark me-2">R</span>
               <span>Reservado</span>
             </div>
             <div class="d-flex align-items-center">
-              <span class="badge bg-danger me-2">V</span>
+              <span class="badge bg-success me-2">V</span>
               <span>Vendido</span>
             </div>
             <div class="d-flex align-items-center">
-              <span class="badge bg-secondary me-2">B</span>
+              <span class="badge bg-warning text-dark me-2">B</span>
               <span>Bloqueado</span>
             </div>
           </div>
@@ -219,7 +219,7 @@
       @for (quadra of quadrasAgrupadas(); track quadra.quadra) {
         <div class="card mb-4">
           <div class="card-header bg-primary text-white">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-column gap-3">
               <h5 class="mb-0">
                 <i class="bi bi-grid-3x3 me-2"></i>
                 Quadra {{ quadra.quadra }}
@@ -229,22 +229,22 @@
                   Total: {{ quadra.totalLotes }}
                 </span>
                 @if (quadra.lotesDisponiveis > 0) {
-                  <span class="badge bg-success">
+                  <span class="badge bg-primary">
                     Disponíveis: {{ quadra.lotesDisponiveis }}
                   </span>
                 }
                 @if (quadra.lotesReservados > 0) {
-                  <span class="badge bg-warning text-dark">
+                  <span class="badge bg-info text-dark">
                     Reservados: {{ quadra.lotesReservados }}
                   </span>
                 }
                 @if (quadra.lotesVendidos > 0) {
-                  <span class="badge bg-danger">
+                  <span class="badge bg-success">
                     Vendidos: {{ quadra.lotesVendidos }}
                   </span>
                 }
                 @if (quadra.lotesBloqueados > 0) {
-                  <span class="badge bg-secondary">
+                  <span class="badge bg-warning text-dark">
                     Bloqueados: {{ quadra.lotesBloqueados }}
                   </span>
                 }
@@ -273,8 +273,10 @@
                       <strong class="text-primary">{{ formatarValor(lote.valor_total) }}</strong>
                       @if (lote.reserva) {
                         <hr class="my-1">
-                        <small class="d-block text-muted">Reservado por:</small>
-                        <small class="d-block fw-bold">{{ lote.reserva.usuario.nome }}</small>
+                        <small class="d-block text-muted">Cliente:</small>
+                        <small class="d-block fw-bold">{{ lote?.reserva?.cliente?.nome }}</small>
+                        <small class="d-block text-muted">Vendedor:</small>
+                        <small class="d-block fw-bold">{{ lote?.reserva?.vendedor?.nome }}</small>
                       }
                     </div>
                     <div class="card-footer p-1 bg-light">

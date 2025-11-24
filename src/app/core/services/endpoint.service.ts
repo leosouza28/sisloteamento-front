@@ -6,6 +6,9 @@ import { ApiService } from './api.service';
 })
 export class EndpointService extends ApiService {
 
+    getDashboard() {
+        return this.get('/v1/admin/dashboard/admin');
+    }
 
     login(data: any) {
         return this.post('/v1/login', data);

@@ -18,14 +18,17 @@ interface Lote {
     nome: string;
   };
   reserva?: {
-    data_hora: Date;
-    usuario: {
-      _id: string;
-      nome: string;
-      documento: string;
+    _id?: string;
+    cliente?: {
+      _id?: string;
+      nome?: string;
+    };
+    vendedor?: {
+      _id?: string;
+      nome?: string;
     };
   };
-  exibivel: boolean;
+  exibivel?: boolean;
 }
 
 interface QuadraAgrupada {
@@ -126,13 +129,13 @@ export class LoteamentosLote implements OnInit {
   getSituacaoClass(situacao: string): string {
     switch (situacao) {
       case 'DISPONIVEL':
-        return 'bg-success';
+        return 'bg-primary';
       case 'RESERVADO':
-        return 'bg-warning';
+        return 'bg-info';
       case 'VENDIDO':
-        return 'bg-danger';
+        return 'bg-success';
       case 'BLOQUEADO':
-        return 'bg-secondary';
+        return 'bg-warning';
       default:
         return 'bg-light';
     }

@@ -178,7 +178,7 @@ export class ReservasVisualizar {
       await this.endpointService.updateReserva({
         reserva_id: reserva._id,
         operacao: 'alterar-lote-situacao',
-        lote_id: lote._id,
+        lote_id: lote.loteamento_quadra_lote,
         nova_situacao: novaSituacao
       });
 

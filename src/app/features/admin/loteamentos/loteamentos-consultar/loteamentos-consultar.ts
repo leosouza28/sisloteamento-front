@@ -30,6 +30,7 @@ export class LoteamentosConsultar {
   perPage = signal(10);
   totalItems = signal(0);
   searchTerm = signal('');
+  selectedLoteamento = signal<string | null>(null);
 
   ngOnInit() {
     this.loadLoteamentos();
@@ -105,5 +106,13 @@ export class LoteamentosConsultar {
 
   gerenciarLotes(id: string) {
     this.router.navigate(['/admin/loteamentos/lotes-importar'], { queryParams: { loteamento_id: id } });
+  }
+
+  toggleActions(id: string) {
+    if (this.selectedLoteamento() === id) {
+      this.selectedLoteamento.set(null);
+    } else {
+      this.selectedLoteamento.set(id);
+    }
   }
 }

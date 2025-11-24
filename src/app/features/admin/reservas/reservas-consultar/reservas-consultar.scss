@@ -1,0 +1,58 @@
+.reserva-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    border-color: #0d6efd;
+  }
+
+  .card-header {
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.125);
+
+    h6 {
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.6rem;
+    }
+  }
+
+  .card-body {
+    padding: 1.25rem;
+
+    small.text-muted {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .fw-semibold {
+      font-size: 0.95rem;
+    }
+  }
+
+  .card-footer {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Cores específicas para os badges no header
+.bg-warning.text-dark .badge.bg-dark {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  color: #ffc107 !important;
+}
+
+.bg-success .badge.bg-light {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.bg-danger .badge.bg-light {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}

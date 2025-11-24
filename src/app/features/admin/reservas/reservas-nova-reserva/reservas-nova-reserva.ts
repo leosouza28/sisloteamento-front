@@ -424,7 +424,7 @@ export class ReservasNovaReserva {
 
       if (response) {
         this.alertService.showSuccess('Reserva criada com sucesso!');
-        this.router.navigate(['/admin/reservas']);
+        this.router.navigate(['/admin/reservas/visualizar'], {queryParams: { id: response._id }});
       }
     } catch (error: any) {
       console.error('Erro ao criar reserva:', error);

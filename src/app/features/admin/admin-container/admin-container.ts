@@ -1,11 +1,12 @@
 import { Component, inject, TemplateRef } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { environment } from '../../../../environments/environment';
 import { SessaoService } from '../../../core/services/sessao.service';
 import { ApiService } from '../../../core/services/api.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { UiModule } from '../../../shared/ui/ui-module';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-admin-container',
@@ -30,6 +31,7 @@ export class AdminContainer {
   public sessao = inject(SessaoService);
   private api = inject(ApiService)
   private alert = inject(AlertService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.sessao.userSubject.subscribe((user: any) => {
@@ -42,6 +44,12 @@ export class AdminContainer {
     })
     this.getVersion();
 
+    this.router.events
+      .pipe(filter((event: any) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        console.log('Navigation');
+        this.offcanvasService.dismiss();
+      });
   }
 
 

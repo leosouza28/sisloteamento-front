@@ -116,7 +116,7 @@ export class ReservasConsultar {
   }
 
   novaReserva() {
-    this.router.navigate(['/admin/reservas/nova-reserva']);
+    this.router.navigate(['/admin/reservas/operar']);
   }
 
   verReserva(id?: string) {

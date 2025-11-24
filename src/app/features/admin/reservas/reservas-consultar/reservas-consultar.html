@@ -38,61 +38,88 @@
                 Nenhuma reserva encontrada.
             </div>
             } @else {
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Data da Reserva</th>
-                            <th>Código</th>
-                            <th>Cliente</th>
-                            <th>Loteamento</th>
-                            <th>Lotes</th>
-                            <th>Vendedor</th>
-                            <th>Situação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (reserva of reservas(); track reserva._id) {
-                        <tr (click)="verReserva(reserva._id)" style="cursor: pointer;">
-                            <td>
-                                {{ reserva.createdAt | date:'dd/MM/yyyy HH:mm' }}
-                            </td>
-                            <td>
-                                {{ reserva.codigo_reserva || '-' }}
-                            </td>
-                            <td>
-                                <div>{{ reserva.cliente?.nome }}</div>
+            <div class="row">
+                @for (reserva of reservas(); track reserva._id) {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 reserva-card" (click)="verReserva(reserva._id)">
+                        <div class="card-header d-flex justify-content-between align-items-center" [ngClass]="{
+                            'bg-warning text-dark': reserva.situacao === 'ATIVA',
+                            'bg-success text-white': reserva.situacao === 'CONCLUIDA',
+                            'bg-danger text-white': reserva.situacao === 'CANCELADA'
+                        }">
+                            <div>
+                                <h6 class="mb-0">
+                                    <i class="bi bi-file-earmark-text me-2"></i>
+                                    {{ reserva.codigo_reserva || 'Sem código' }}
+                                </h6>
+                            </div>
+                            <span class="badge" [ngClass]="{
+                                'bg-dark': reserva.situacao === 'ATIVA',
+                                'bg-light text-success': reserva.situacao === 'CONCLUIDA',
+                                'bg-light text-danger': reserva.situacao === 'CANCELADA'
+                            }">
+                                <i class="bi me-1" [ngClass]="{
+                                    'bi-clock': reserva.situacao === 'ATIVA',
+                                    'bi-check-circle': reserva.situacao === 'CONCLUIDA',
+                                    'bi-x-circle': reserva.situacao === 'CANCELADA'
+                                }"></i>
+                                {{ reserva.situacao }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-calendar3 me-1"></i>Data da Reserva
+                                </small>
+                                <strong>{{ reserva.createdAt | date:'dd/MM/yyyy HH:mm' }}</strong>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-person me-1"></i>Cliente
+                                </small>
+                                <div class="fw-semibold">{{ reserva.cliente?.nome }}</div>
                                 <small class="text-muted">{{ reserva.cliente?.documento }}</small>
-                            </td>
-                            <td>{{ reserva.loteamento?.nome }}</td>
-                            <td>
-                                @if (reserva.lotes && reserva.lotes.length > 0) {
-                                <span class="badge bg-primary">{{ reserva.lotes.length }} lote(s)</span>
-                                } @else {
-                                <span class="text-muted">-</span>
-                                }
-                            </td>
-                            <td>
-                                @if (reserva.vendedor?.nome) {
-                                <span>{{ reserva.vendedor?.nome }}</span>
-                                } @else {
-                                <span class="text-muted">-</span>
-                                }
-                            </td>
-                            <td>
-                                <!-- adicionar o badge -->
-                                <span [ngClass]="{
-                                    'badge bg-primary': reserva.situacao === 'ATIVA',
-                                    'badge bg-success': reserva.situacao === 'CONCLUIDA',
-                                    'badge bg-danger': reserva.situacao === 'CANCELADA'
-                                }">
-                                    {{ reserva.situacao }}
-                                </span>
-                            </td>
-                        </tr>
-                        }
-                    </tbody>
-                </table>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-geo-alt me-1"></i>Loteamento
+                                </small>
+                                <div class="fw-semibold">{{ reserva.loteamento?.nome }}</div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="bi bi-grid-3x3 me-1"></i>Lotes
+                                    </small>
+                                    @if (reserva.lotes && reserva.lotes.length > 0) {
+                                    <span class="badge bg-primary fs-6">{{ reserva.lotes.length }}</span>
+                                    } @else {
+                                    <span class="text-muted">-</span>
+                                    }
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="bi bi-person-badge me-1"></i>Vendedor
+                                    </small>
+                                    @if (reserva.vendedor?.nome) {
+                                    <small class="fw-semibold">{{ reserva.vendedor?.nome }}</small>
+                                    } @else {
+                                    <small class="text-muted">Não atribuído</small>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-center">
+                            <small class="text-muted">
+                                <i class="bi bi-eye me-1"></i>Clique para visualizar detalhes
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                }
             </div>
 
             <nav class="mt-3">

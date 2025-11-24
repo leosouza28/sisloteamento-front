@@ -3,7 +3,21 @@
     <div class="col">
       <h2 class="mb-0">Detalhes da Reserva</h2>
       @if (reserva()?.codigo_reserva) {
-        <p class="text-muted mb-0">Código: <strong>{{ reserva()?.codigo_reserva }}</strong></p>
+        <p class="text-muted mb-0">
+          Código: <strong>{{ reserva()?.codigo_reserva }}</strong>
+          <span class="badge ms-2" [ngClass]="{
+            'bg-primary text-white': reserva()?.situacao === 'ATIVA',
+            'bg-success': reserva()?.situacao === 'CONCLUIDA',
+            'bg-danger': reserva()?.situacao === 'CANCELADA'
+          }">
+            <i class="bi me-1" [ngClass]="{
+              'bi-clock': reserva()?.situacao === 'ATIVA',
+              'bi-check-circle': reserva()?.situacao === 'CONCLUIDA',
+              'bi-x-circle': reserva()?.situacao === 'CANCELADA'
+            }"></i>
+            {{ reserva()?.situacao }}
+          </span>
+        </p>
       }
     </div>
     <div class="col-auto">
