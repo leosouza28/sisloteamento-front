@@ -94,4 +94,8 @@ export class EndpointService extends ApiService {
         return this.post('/v1/admin/upload', formData);
     }
 
+    alterarSituacaoLotes(data: { lote_ids: string[], situacao: string }) {
+        return this.put('/v1/lotes/situacao', data);
+    }
+
 }

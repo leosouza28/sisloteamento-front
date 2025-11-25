@@ -31,14 +31,15 @@
             <div class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>
                 <strong>Formato esperado do CSV:</strong><br>
-                QD,LT,MQ,VALOR_MQ,VALOR_BASE,ENTRADA<br>
+                QD,LT,MQ,VALOR_MQ,VALOR_BASE,ENTRADA,SITUACAO<br>
                 <small class="text-muted">
                     - QD: Quadra<br>
                     - LT: Lote<br>
                     - MQ: Área (m²)<br>
                     - VALOR_MQ: Valor por m²<br>
                     - VALOR_BASE: Valor total<br>
-                    - ENTRADA: Valor da entrada
+                    - ENTRADA: Valor da entrada<br>
+                    - SITUACAO (opcional): D=Disponível, R=Reservado, B=Bloqueado, V=Vendido (padrão: D)
                 </small>
             </div>
         </div>
@@ -83,6 +84,7 @@
                                 <th style="width: 120px">Valor/m²</th>
                                 <th style="width: 140px">Valor Total</th>
                                 <th style="width: 140px">Entrada</th>
+                                <th style="width: 120px">Situação</th>
                                 <th style="width: 80px">Ações</th>
                             </tr>
                         </thead>
@@ -96,19 +98,29 @@
                                     <input type="text" class="form-control form-control-sm" formControlName="lote" />
                                 </td>
                                 <td>
-                                    <input class="form-control form-control-sm" formControlName="area" />
+                                    <input currencyMask [options]="{ prefix: '', thousands: ',', decimal: '.' }"
+                                        class="form-control form-control-sm" formControlName="area" />
                                 </td>
                                 <td>
                                     <input currencyMask class="form-control form-control-sm"
-                                        formControlName="valor_area" />
+                                        formControlName="valor_area"
+                                        [options]="{ prefix: '', thousands: '.', decimal: ',' }" />
                                 </td>
                                 <td>
                                     <input currencyMask class="form-control form-control-sm"
-                                        formControlName="valor_total" />
+                                        formControlName="valor_total"
+                                        [options]="{ prefix: '', thousands: '.', decimal: ',' }" />
                                 </td>
                                 <td>
-                                    <input currencyMask class="form-control form-control-sm"
-                                        formControlName="entrada" />
+                                    <input currencyMask class="form-control form-control-sm" formControlName="entrada"
+                                        [options]="{ prefix: '', thousands: '.', decimal: ',' }" />
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm" formControlName="situacao">
+                                        @for (situacao of situacoes; track situacao.value) {
+                                        <option [value]="situacao.value">{{ situacao.label }}</option>
+                                        }
+                                    </select>
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-danger" (click)="removerLote($index)"

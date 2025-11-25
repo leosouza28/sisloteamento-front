@@ -94,7 +94,7 @@
             <div class="card-body">
               <!-- Resumo Quantitativo -->
               <div class="row mb-4 row-gap-4">
-                <div class="col-md-3">
+                <div class="col-lg-4 col-md-4">
                   <div class="card text-center h-100 border-secondary">
                     <div class="card-body">
                       <h2 class="text-secondary mb-2">{{ resumoGeral.total }}</h2>
@@ -102,7 +102,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-2 col-md-4">
                   <div class="card text-center h-100 border-primary">
                     <div class="card-body">
                       <h2 class="text-primary mb-2">{{ resumoGeral.disponiveis }}</h2>
@@ -111,7 +111,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-2 col-md-4">
                   <div class="card text-center h-100 border-info">
                     <div class="card-body">
                       <h2 class="text-info mb-2">{{ resumoGeral.reservados }}</h2>
@@ -120,12 +120,21 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-2 col-md-4">
                   <div class="card text-center h-100 border-success">
                     <div class="card-body">
                       <h2 class="text-success mb-2">{{ resumoGeral.vendidos }}</h2>
                       <p class="mb-0 text-muted">Vendidos</p>
                       <small class="text-muted">{{ (resumoGeral.vendidos / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                  <div class="card text-center h-100 border-warning">
+                    <div class="card-body">
+                      <h2 class="text-warning mb-2">{{ resumoGeral.bloqueados }}</h2>
+                      <p class="mb-0 text-muted">Bloqueados</p>
+                      <small class="text-muted">{{ (resumoGeral.bloqueados / resumoGeral.total * 100) | number:'1.1-1' }}%</small>
                     </div>
                   </div>
                 </div>
@@ -215,40 +224,106 @@
         </div>
       </div>
 
+      <!-- Controles de Seleção Múltipla -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              @if (!modoSelecaoMultipla()) {
+                <h6 class="mb-0">Operações em Lote</h6>
+                <small class="text-muted">Selecione múltiplos lotes para bloquear ou desbloquear</small>
+              } @else {
+                <h6 class="mb-0">Modo de Seleção Ativo</h6>
+                <small class="text-muted">Clique nos lotes disponíveis ou bloqueados para selecionar</small>
+              }
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              @if (!modoSelecaoMultipla()) {
+                <button class="btn btn-outline-primary" (click)="ativarSelecaoMultipla()">
+                  <i class="bi bi-check-square me-2"></i>
+                  Ativar Seleção Múltipla
+                </button>
+              } @else {
+                <span class="badge bg-info text-dark fs-6 d-flex align-items-center px-3 py-2">
+                  <i class="bi bi-check-circle me-2"></i>
+                  {{ lotesSelecionados().size }} selecionado(s)
+                </span>
+                @if (lotesSelecionados().size > 0) {
+                  <button class="btn btn-warning" (click)="bloquearLotesSelecionados()" [disabled]="processandoOperacao()">
+                    @if (processandoOperacao()) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bi bi-lock me-2"></i>
+                    Bloquear
+                  </button>
+                  <button class="btn btn-success" (click)="desbloquearLotesSelecionados()" [disabled]="processandoOperacao()">
+                    @if (processandoOperacao()) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bi bi-unlock me-2"></i>
+                    Desbloquear
+                  </button>
+                }
+                <button class="btn btn-outline-secondary" (click)="cancelarSelecaoMultipla()">
+                  <i class="bi bi-x-circle me-2"></i>
+                  Cancelar
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Quadras -->
       @for (quadra of quadrasAgrupadas(); track quadra.quadra) {
         <div class="card mb-4">
           <div class="card-header bg-primary text-white">
-            <div class="d-flex flex-column gap-3">
-              <h5 class="mb-0">
-                <i class="bi bi-grid-3x3 me-2"></i>
-                Quadra {{ quadra.quadra }}
-              </h5>
-              <div class="d-flex gap-3">
-                <span class="badge bg-light text-dark">
-                  Total: {{ quadra.totalLotes }}
-                </span>
-                @if (quadra.lotesDisponiveis > 0) {
-                  <span class="badge bg-primary">
-                    Disponíveis: {{ quadra.lotesDisponiveis }}
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <div class="d-flex flex-column gap-3">
+                <h5 class="mb-0">
+                  <i class="bi bi-grid-3x3 me-2"></i>
+                  Quadra {{ quadra.quadra }}
+                </h5>
+                <div class="d-flex gap-3">
+                  <span class="badge bg-light text-dark">
+                    Total: {{ quadra.totalLotes }}
                   </span>
-                }
-                @if (quadra.lotesReservados > 0) {
-                  <span class="badge bg-info text-dark">
-                    Reservados: {{ quadra.lotesReservados }}
-                  </span>
-                }
-                @if (quadra.lotesVendidos > 0) {
-                  <span class="badge bg-success">
-                    Vendidos: {{ quadra.lotesVendidos }}
-                  </span>
-                }
-                @if (quadra.lotesBloqueados > 0) {
-                  <span class="badge bg-warning text-dark">
-                    Bloqueados: {{ quadra.lotesBloqueados }}
-                  </span>
-                }
+                  @if (quadra.lotesDisponiveis > 0) {
+                    <span class="badge bg-primary">
+                      Disponíveis: {{ quadra.lotesDisponiveis }}
+                    </span>
+                  }
+                  @if (quadra.lotesReservados > 0) {
+                    <span class="badge bg-info text-dark">
+                      Reservados: {{ quadra.lotesReservados }}
+                    </span>
+                  }
+                  @if (quadra.lotesVendidos > 0) {
+                    <span class="badge bg-success">
+                      Vendidos: {{ quadra.lotesVendidos }}
+                    </span>
+                  }
+                  @if (quadra.lotesBloqueados > 0) {
+                    <span class="badge bg-warning text-dark">
+                      Bloqueados: {{ quadra.lotesBloqueados }}
+                    </span>
+                  }
+                </div>
               </div>
+              @if (modoSelecaoMultipla()) {
+                <button 
+                  class="btn btn-light btn-sm" 
+                  (click)="selecionarTodosQuadra(quadra)"
+                  [disabled]="!temLotesSelecionaveisNaQuadra(quadra)">
+                  @if (todosSelecionadosNaQuadra(quadra)) {
+                    <i class="bi bi-x-square me-2"></i>
+                    Desselecionar Todos
+                  } @else {
+                    <i class="bi bi-check-all me-2"></i>
+                    Selecionar Todos
+                  }
+                </button>
+              }
             </div>
           </div>
           <div class="card-body">
@@ -256,9 +331,25 @@
               @for (lote of quadra.lotes; track lote._id) {
                 <div class="col-auto">
                   <div 
-                    class="card text-center shadow-sm"
+                    class="card text-center shadow-sm position-relative"
                     style="min-width: 100px;"
+                    [class.border-primary]="modoSelecaoMultipla() && isLoteSelecionado(lote._id)"
+                    [class.border-3]="modoSelecaoMultipla() && isLoteSelecionado(lote._id)"
+                    [class.opacity-50]="modoSelecaoMultipla() && !podeSelecionar(lote.situacao)"
+                    [style.cursor]="modoSelecaoMultipla() && podeSelecionar(lote.situacao) ? 'pointer' : 'default'"
+                    (click)="modoSelecaoMultipla() && podeSelecionar(lote.situacao) && toggleLoteSelecionado(lote._id)"
                   >
+                    @if (modoSelecaoMultipla() && podeSelecionar(lote.situacao)) {
+                      <div class="position-absolute top-0 end-0 p-1">
+                        <input 
+                          type="checkbox" 
+                          class="form-check-input" 
+                          [checked]="isLoteSelecionado(lote._id)"
+                          (click)="$event.stopPropagation()"
+                          (change)="toggleLoteSelecionado(lote._id)"
+                        />
+                      </div>
+                    }
                     <div class="card-header py-1" [ngClass]="getSituacaoClass(lote.situacao)">
                       <strong class="text-white">{{ lote.lote }}</strong>
                     </div>
@@ -277,6 +368,20 @@
                         <small class="d-block fw-bold">{{ lote?.reserva?.cliente?.nome }}</small>
                         <small class="d-block text-muted">Vendedor:</small>
                         <small class="d-block fw-bold">{{ lote?.reserva?.vendedor?.nome }}</small>
+                      } @else if (lote.situacao === 'RESERVADO' || lote.situacao === 'VENDIDO') {
+                        <hr class="my-1">
+                        <small class="d-block text-muted fst-italic">
+                          <i class="bi bi-pencil-square me-1"></i>
+                          Inserção manual
+                        </small>
+                      }
+                      @if (temDivergenciaSituacao(lote)) {
+                        <hr class="my-1">
+                        <small class="d-block text-warning" 
+                          [title]="'CSV: ' + getSituacaoLabel(lote.situacao_csv) + ' → Sistema: ' + getSituacaoLabel(lote.situacao_sistema)">
+                          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                          Situação alterada
+                        </small>
                       }
                     </div>
                     <div class="card-footer p-1 bg-light">

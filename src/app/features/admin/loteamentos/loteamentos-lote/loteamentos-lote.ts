@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { EndpointService } from '../../../../core/services/endpoint.service';
 import { AlertService } from '../../../../core/services/alert.service';
 import { UiModule } from '../../../../shared/ui/ui-module';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ConfirmModalComponent } from '../../../../shared/ui/confirm-modal/confirm-modal';
 
 interface Lote {
   _id: string;
@@ -13,6 +15,8 @@ interface Lote {
   valor_total: number;
   valor_entrada: number;
   situacao: string;
+  situacao_sistema?: string;
+  situacao_csv?: string;
   loteamento?: {
     _id: string;
     nome: string;
@@ -50,6 +54,7 @@ interface QuadraAgrupada {
 export class LoteamentosLote implements OnInit {
   private endpointService = inject(EndpointService);
   private alertService = inject(AlertService);
+  private modalService = inject(NgbModal);
 
   loading = signal(false);
   loadingLotes = signal(false);
@@ -57,6 +62,9 @@ export class LoteamentosLote implements OnInit {
   loteamentos = signal<any[]>([]);
   loteamentoSelecionado = signal<any | null>(null);
   quadrasAgrupadas = signal<QuadraAgrupada[]>([]);
+  modoSelecaoMultipla = signal<boolean>(false);
+  lotesSelecionados = signal<Set<string>>(new Set());
+  processandoOperacao = signal<boolean>(false);
 
   ngOnInit() {
     this.carregarLoteamentos();
@@ -213,5 +221,130 @@ export class LoteamentosLote implements OnInit {
   voltarParaSelecao() {
     this.loteamentoSelecionado.set(null);
     this.quadrasAgrupadas.set([]);
+  }
+
+  temDivergenciaSituacao(lote: Lote): boolean {
+    return !!(lote.situacao_sistema && lote.situacao_csv && lote.situacao_sistema !== lote.situacao_csv);
+  }
+
+  getSituacaoLabel(situacao?: string): string {
+    const labels: { [key: string]: string } = {
+      'DISPONIVEL': 'Disponível',
+      'RESERVADO': 'Reservado',
+      'VENDIDO': 'Vendido',
+      'BLOQUEADO': 'Bloqueado'
+    };
+    return labels[situacao || ''] || situacao || '';
+  }
+
+  ativarSelecaoMultipla() {
+    this.modoSelecaoMultipla.set(true);
+    this.lotesSelecionados.set(new Set());
+  }
+
+  cancelarSelecaoMultipla() {
+    this.modoSelecaoMultipla.set(false);
+    this.lotesSelecionados.set(new Set());
+  }
+
+  podeSelecionar(situacao: string): boolean {
+    return situacao === 'DISPONIVEL' || situacao === 'BLOQUEADO';
+  }
+
+  toggleLoteSelecionado(loteId: string) {
+    const selecionados = new Set(this.lotesSelecionados());
+    if (selecionados.has(loteId)) {
+      selecionados.delete(loteId);
+    } else {
+      selecionados.add(loteId);
+    }
+    this.lotesSelecionados.set(selecionados);
+  }
+
+  isLoteSelecionado(loteId: string): boolean {
+    return this.lotesSelecionados().has(loteId);
+  }
+
+  temLotesSelecionaveisNaQuadra(quadra: QuadraAgrupada): boolean {
+    return quadra.lotes.some(lote => this.podeSelecionar(lote.situacao));
+  }
+
+  todosSelecionadosNaQuadra(quadra: QuadraAgrupada): boolean {
+    const lotesSeleccionaveis = quadra.lotes.filter(lote => this.podeSelecionar(lote.situacao));
+    if (lotesSeleccionaveis.length === 0) return false;
+    return lotesSeleccionaveis.every(lote => this.isLoteSelecionado(lote._id));
+  }
+
+  selecionarTodosQuadra(quadra: QuadraAgrupada) {
+    const selecionados = new Set(this.lotesSelecionados());
+    const lotesSeleccionaveis = quadra.lotes.filter(lote => this.podeSelecionar(lote.situacao));
+    
+    // Verifica se todos os lotes selecionáveis já estão selecionados
+    const todosJaSelecionados = lotesSeleccionaveis.every(lote => selecionados.has(lote._id));
+    
+    if (todosJaSelecionados) {
+      // Desseleciona todos da quadra
+      lotesSeleccionaveis.forEach(lote => selecionados.delete(lote._id));
+    } else {
+      // Seleciona todos da quadra
+      lotesSeleccionaveis.forEach(lote => selecionados.add(lote._id));
+    }
+    
+    this.lotesSelecionados.set(selecionados);
+  }
+
+  async bloquearLotesSelecionados() {
+    await this.alterarSituacaoLotes('BLOQUEADO');
+  }
+
+  async desbloquearLotesSelecionados() {
+    await this.alterarSituacaoLotes('DISPONIVEL');
+  }
+
+  private async alterarSituacaoLotes(novaSituacao: string) {
+    const loteIds = Array.from(this.lotesSelecionados());
+    
+    if (loteIds.length === 0) {
+      this.alertService.showWarning('Nenhum lote selecionado');
+      return;
+    }
+
+    const textoSituacao = novaSituacao === 'BLOQUEADO' ? 'bloquear' : 'desbloquear';
+    
+    const modalRef = this.modalService.open(ConfirmModalComponent, { centered: true });
+    modalRef.componentInstance.title = 'Confirmar operação';
+    modalRef.componentInstance.message = `Deseja ${textoSituacao} ${loteIds.length} lote(s)?`;
+    
+    try {
+      const confirmed = await modalRef.result;
+      if (!confirmed) {
+        return;
+      }
+    } catch {
+      // Modal foi fechado sem confirmar
+      return;
+    }
+
+    try {
+      this.processandoOperacao.set(true);
+      
+      await this.endpointService.alterarSituacaoLotes({
+        lote_ids: loteIds,
+        situacao: novaSituacao
+      });
+
+      this.alertService.showSuccess(`${loteIds.length} lote(s) ${novaSituacao === 'BLOQUEADO' ? 'bloqueado(s)' : 'desbloqueado(s)'} com sucesso!`);
+      
+      // Recarrega os lotes
+      await this.carregarLotes(this.loteamentoSelecionado()?._id);
+      
+      // Cancela o modo de seleção
+      this.cancelarSelecaoMultipla();
+    } catch (error: any) {
+      console.error('Erro ao alterar situação dos lotes:', error);
+      this.alertService.showDanger(error?.message || 'Erro ao alterar situação dos lotes');
+    } finally {
+      this.processandoOperacao.set(false);
+    }
   }
 }

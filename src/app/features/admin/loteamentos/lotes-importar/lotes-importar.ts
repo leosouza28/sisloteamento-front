@@ -12,6 +12,7 @@ interface LoteCSV {
   VALOR_MQ: string;
   VALOR_BASE: string;
   ENTRADA: string;
+  SITUACAO?: string;
 }
 
 interface Lote {
@@ -21,6 +22,7 @@ interface Lote {
   valor_area: number;
   valor_total: number;
   entrada: number;
+  situacao: string;
 }
 
 @Component({
@@ -41,6 +43,13 @@ export class LotesImportar {
   loteamentoId = signal<string | null>(null);
   loteamentoNome = signal<string>('');
   arquivoNome = signal<string>('');
+  
+  situacoes = [
+    { value: 'D', label: 'Disponível' },
+    { value: 'R', label: 'Reservado' },
+    { value: 'B', label: 'Bloqueado' },
+    { value: 'V', label: 'Vendido' }
+  ];
   
   form: FormGroup = this.fb.group({
     lotes: this.fb.array([])
@@ -132,7 +141,8 @@ export class LotesImportar {
           MQ: valores[2],
           VALOR_MQ: valores[3],
           VALOR_BASE: valores[4],
-          ENTRADA: valores[5]
+          ENTRADA: valores[5],
+          SITUACAO: valores[6] || 'D' // Default: Disponível
         };
 
         this.adicionarLote(loteData);
@@ -143,13 +153,16 @@ export class LotesImportar {
   }
 
   adicionarLote(data: LoteCSV) {
+    const situacao = this.validarSituacao(data.SITUACAO);
+    
     const loteGroup = this.fb.group({
       quadra: [data.QD, Validators.required],
       lote: [data.LT, Validators.required],
       area: [this.parseNumero(data.MQ), [Validators.required, Validators.min(0)]],
       valor_area: [this.parseNumero(data.VALOR_MQ), [Validators.required, Validators.min(0)]],
       valor_total: [this.parseNumero(data.VALOR_BASE), [Validators.required, Validators.min(0)]],
-      entrada: [this.parseNumero(data.ENTRADA), [Validators.required, Validators.min(0)]]
+      entrada: [this.parseNumero(data.ENTRADA), [Validators.required, Validators.min(0)]],
+      situacao: [situacao, Validators.required]
     });
 
     // Escutar mudanças em área ou valor_area para recalcular valor_total
@@ -182,6 +195,15 @@ export class LotesImportar {
       .replace(',', '.');     // Substitui vírgula por ponto (decimal)
     
     return parseFloat(valorLimpo) || 0;
+  }
+
+  validarSituacao(situacao?: string): string {
+    if (!situacao) return 'D';
+    
+    const situacaoUpper = situacao.toUpperCase().trim();
+    const situacoesValidas = ['D', 'R', 'B', 'V'];
+    
+    return situacoesValidas.includes(situacaoUpper) ? situacaoUpper : 'D';
   }
 
   removerLote(index: number) {
