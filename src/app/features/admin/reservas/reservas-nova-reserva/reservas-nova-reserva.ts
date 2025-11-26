@@ -11,6 +11,7 @@ import { UsuariosForm } from '../../usuarios/usuarios-form/usuarios-form';
 
 interface Lote {
   _id: string;
+  loteamento_quadra_lote: string;
   quadra: string;
   lote: string;
   area: number;
@@ -48,6 +49,7 @@ export class ReservasNovaReserva {
   quadrasAgrupadasOriginal = signal<QuadraAgrupada[]>([]);
   lotesSelecionados = signal<Set<string>>(new Set());
   buscaLote = signal('');
+  reservaData = signal<string | null>(null);
 
   buscaCliente = signal('');
   buscandoCliente = signal(false);
@@ -63,6 +65,8 @@ export class ReservasNovaReserva {
   ngOnInit() {
     this.loadLoteamentos();
     this.setupBuscaCliente();
+    // Definir data da reserva padrão como hoje (formato YYYY-MM-DD para input[type=date])
+    this.reservaData.set(new Date().toISOString().slice(0, 10));
   }
 
   async loadLoteamentos() {
@@ -222,10 +226,29 @@ export class ReservasNovaReserva {
         // Se a quadra corresponde, incluir todos os lotes
         quadrasFiltradas.push(quadra);
       } else {
-        // Se não, filtrar apenas os lotes que correspondem
-        const lotesFiltrados = quadra.lotes.filter((lote) =>
-          lote.lote.toLowerCase().includes(termoLower)
-        );
+        // Se não, filtrar apenas os lotes que correspondem por número do lote
+        // ou pelo campo `loteamento_quadra_lote` (ex: 01-002-045)
+        const lotesFiltrados = quadra.lotes.filter((lote) => {
+          const loteStr = String(lote.lote || '').toLowerCase();
+          const quadraStr = String(lote.quadra || '').toLowerCase();
+          const lql = String(lote.loteamento_quadra_lote || '').toLowerCase();
+
+          // Caso formato concatenado 6 dígitos (ex: 002003 => quadra 002 lote 003)
+          const seisDigitos = termoLower.replace(/\D/g, '');
+          let matchConcatenado = false;
+          if (/^\d{6}$/.test(seisDigitos)) {
+            const q = seisDigitos.slice(0, 3);
+            const l = seisDigitos.slice(3);
+            matchConcatenado = (String(lote.quadra).padStart(3, '0') === q && String(lote.lote).padStart(3, '0') === l);
+          }
+
+          return (
+            matchConcatenado ||
+            loteStr.includes(termoLower) ||
+            quadraStr.includes(termoLower) ||
+            lql.includes(termoLower)
+          );
+        });
 
         if (lotesFiltrados.length > 0) {
           quadrasFiltradas.push({
@@ -450,6 +473,11 @@ export class ReservasNovaReserva {
   }
 
   async salvar() {
+    if (!this.reservaData()) {
+      this.alertService.showWarning('Data da Reserva é obrigatória');
+      return;
+    }
+
     if (!this.clienteSelecionado()) {
       this.alertService.showWarning('Selecione um cliente');
       return;
@@ -468,6 +496,7 @@ export class ReservasNovaReserva {
         lotes_ids: Array.from(this.lotesSelecionados()),
         cliente_id: cliente._id,
         vendedor_id: this.vendedorSelecionado()?._id || undefined,
+        data_reserva: this.reservaData() ? new Date(this.reservaData()!).toISOString() : undefined,
       };
 
       const response = await this.endpointService.criarReserva(payload);

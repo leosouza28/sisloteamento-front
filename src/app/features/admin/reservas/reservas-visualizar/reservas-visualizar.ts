@@ -7,6 +7,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 interface Reserva {
   _id?: string;
+  data_reserva: string;
   codigo_reserva?: string;
   loteamento?: {
     _id?: string;

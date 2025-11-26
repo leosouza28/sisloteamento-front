@@ -19,6 +19,10 @@
           </span>
         </p>
       }
+
+      @if (reserva()?.data_reserva) {
+        <p class="text-muted mb-0">Data da Reserva: <strong>{{ reserva()?.data_reserva | dateSimple }}</strong></p>
+      }
     </div>
     <div class="col-auto">
       <button class="btn btn-secondary" (click)="voltar()">

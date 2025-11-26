@@ -35,6 +35,9 @@ export class EndpointService extends ApiService {
     saveUsuario(data: any) {
         return this.post('/v1/admin/usuarios', data);
     }
+    saveUsuarioCliente(data: any) {
+        return this.post('/v1/admin/usuarios/simples', data);
+    }
 
     getPermissoes() {
         return this.get('/v1/admin/usuarios/permissoes');

@@ -5,6 +5,7 @@ import { UiModule } from '../../../../shared/ui/ui-module';
 
 interface Reserva {
   _id?: string;
+  data_reserva: string;
   codigo_reserva?: string;
   loteamento?: {
     _id?: string;

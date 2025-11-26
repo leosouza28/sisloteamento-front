@@ -34,7 +34,7 @@ export class UsuariosForm implements OnInit {
   form: FormGroup = this.fb.group({
     _id: [''],
     nome: ['', Validators.required],
-    documento: ['', Validators.required],
+    documento: [''],
     email: [''],
     senha: [''],
     data_nascimento: [''],
@@ -90,6 +90,8 @@ export class UsuariosForm implements OnInit {
           this.form.get('documento')?.disable();
         } else {
           this.form.get('senha')?.setValidators([Validators.required]);
+          // Para criação de usuário via formulário padrão (não clienteOnly), documento é obrigatório
+          this.form.get('documento')?.setValidators([Validators.required]);
         }
       });
     }
@@ -266,6 +268,34 @@ export class UsuariosForm implements OnInit {
   }
 
   async salvar() {
+    // Validação customizada para criação de cliente (modo clienteOnly):
+    // apenas 'nome' e ao menos um telefone com valor (preferencialmente marcado como principal) são obrigatórios.
+    if (this.clienteOnly) {
+      const nome = this.form.get('nome')?.value;
+      const telefonesArray = this.telefones || null;
+      const telefonesVal = telefonesArray ? telefonesArray.value : [];
+
+      if (!nome || String(nome).trim() === '') {
+        this.alertService.showWarning('Nome é obrigatório para o cliente');
+        return;
+      }
+
+      const temTelefoneComValor = telefonesVal.some((t: any) => t && t.valor && String(t.valor).trim() !== '');
+      if (!temTelefoneComValor) {
+        this.alertService.showWarning('Informe ao menos um telefone principal para o cliente');
+        return;
+      }
+
+      // Garantir que exista um telefone marcado como principal; se não houver, marcar o primeiro com valor
+      const temPrincipal = telefonesVal.some((t: any) => t && t.principal);
+      if (!temPrincipal) {
+        const idx = telefonesVal.findIndex((t: any) => t && t.valor && String(t.valor).trim() !== '');
+        if (idx >= 0 && this.telefones.at(idx)) {
+          this.telefones.at(idx).get('principal')?.setValue(true);
+        }
+      }
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       let camposObrigatorios: any[] = [];
@@ -312,7 +342,13 @@ export class UsuariosForm implements OnInit {
         payload.senha = formValue.senha;
       }
 
-      const response = await this.endpointService.saveUsuario(payload);
+      let response: any;
+      if (this.modalMode) {
+        // Quando usado em modal (ex.: cadastro rápido de cliente), usar endpoint simples
+        response = await this.endpointService.saveUsuarioCliente(payload);
+      } else {
+        response = await this.endpointService.saveUsuario(payload);
+      }
 
       if (response) {
         this.alertService.showSuccess(this.clienteOnly ? 'Cliente cadastrado com sucesso!' : 'Usuário salvo com sucesso!');
