@@ -21,11 +21,11 @@ export class BiDashboard1 implements OnInit, OnDestroy {
   
   // Gráfico de Lotes
   public lotesChartData: ChartConfiguration['data'] = {
-    labels: ['Disponíveis', 'Vendidos', 'Reservados', 'Bloqueados'],
+    labels: ['Disponíveis', 'Vendidos', 'Reservados'],
     datasets: [{
-      data: [0, 0, 0, 0],
-      backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#dc3545'],
-      borderColor: ['#059669', '#2563eb', '#d97706', '#b02a37'],
+      data: [0, 0, 0],
+      backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+      borderColor: ['#059669', '#2563eb', '#d97706'],
       borderWidth: 2
     }]
   };
@@ -132,8 +132,7 @@ export class BiDashboard1 implements OnInit, OnDestroy {
     this.lotesChartData.datasets[0].data = [
       this.dashboardData.total_lotes_disponiveis || 0,
       this.dashboardData.total_lotes_vendidos || 0,
-      this.dashboardData.total_lotes_reservados || 0,
-      this.dashboardData.total_lotes_bloqueados || 0
+      this.dashboardData.total_lotes_reservados || 0
     ];
 
     // Atualizar gráfico de reservas

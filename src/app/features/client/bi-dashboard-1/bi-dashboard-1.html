@@ -222,50 +222,71 @@
       </div>
     </div>
 
-    <!-- Recent Reservations Table -->
-    <div class="card">
-      <div class="card-header bg-white">
-        <h5 class="card-title mb-0">Últimas Reservas</h5>
-        <small class="text-muted">{{ dashboardData.lista_ultimas_reservas?.length || 0 }} registros recentes</small>
+    <!-- Recent Reservations Cards -->
+    <div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-0">Últimas Reservas</h5>
+          <small class="text-muted">{{ dashboardData.lista_ultimas_reservas?.length || 0 }} registros recentes</small>
+        </div>
       </div>
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table *ngIf="dashboardData.lista_ultimas_reservas?.length > 0" class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Código</th>
-                <th>Data Reserva</th>
-                <th>Há quanto tempo</th>
-                <th>Cliente</th>
-                <th>Lote</th>
-                <th class="text-end">Valor Total</th>
-                <th class="text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let reserva of dashboardData.lista_ultimas_reservas">
-                <td><strong class="text-primary">{{ reserva.codigo_reserva || '-' }}</strong></td>
-                <td>{{ reserva.data_reserva | dateSimple }}</td>
-                <td><small class="text-muted">{{ reserva.createdAt | dateFromNow }}</small></td>
-                <td>{{ reserva.cliente?.nome || '-' }}</td>
-                <td><span class="badge bg-secondary">{{ getLoteDisplay(reserva) }}</span></td>
-                <td class="text-end fw-semibold">{{ formatCurrency(getValorTotal(reserva)) }}</td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="{
-                    'bg-success': reserva.situacao === 'ATIVA',
-                    'bg-primary': reserva.situacao === 'CONCLUIDA',
-                    'bg-danger': reserva.situacao === 'CANCELADA'
-                  }">
-                    {{ reserva.situacao || '-' }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div *ngIf="!dashboardData.lista_ultimas_reservas?.length" class="text-center py-5 text-muted">
-            <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
-            <p class="mb-0">Nenhuma reserva registrada ainda</p>
+
+      <div *ngIf="dashboardData.lista_ultimas_reservas?.length > 0" class="row g-3">
+        <div *ngFor="let reserva of dashboardData.lista_ultimas_reservas" class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100 border-start border-4" [ngClass]="{
+            'border-success': reserva.situacao === 'ATIVA',
+            'border-primary': reserva.situacao === 'CONCLUIDA',
+            'border-danger': reserva.situacao === 'CANCELADA'
+          }">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h6 class="mb-1 text-primary fw-bold">{{ reserva.codigo_reserva || '-' }}</h6>
+                  <small class="text-muted">
+                    <i class="bi bi-calendar3"></i> {{ reserva.data_reserva | dateSimple }}
+                  </small>
+                </div>
+                <span class="badge" [ngClass]="{
+                  'bg-success': reserva.situacao === 'ATIVA',
+                  'bg-primary': reserva.situacao === 'CONCLUIDA',
+                  'bg-danger': reserva.situacao === 'CANCELADA'
+                }">
+                  {{ reserva.situacao || '-' }}
+                </span>
+              </div>
+
+              <div class="mb-2">
+                <small class="text-muted d-block mb-1">
+                  <i class="bi bi-clock"></i> {{ reserva.createdAt | dateFromNow }}
+                </small>
+              </div>
+
+              <hr class="my-2">
+
+              <div class="mb-2">
+                <small class="text-muted d-block">Cliente</small>
+                <span class="fw-semibold">{{ reserva.cliente?.nome || '-' }}</span>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted d-block">Lote</small>
+                  <span class="badge bg-secondary">{{ getLoteDisplay(reserva) }}</span>
+                </div>
+                <div class="text-end">
+                  <small class="text-muted d-block">Valor Total</small>
+                  <span class="fw-bold text-success">{{ formatCurrency(getValorTotal(reserva)) }}</span>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <div *ngIf="!dashboardData.lista_ultimas_reservas?.length" class="card">
+        <div class="card-body text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+          <p class="mb-0">Nenhuma reserva registrada ainda</p>
         </div>
       </div>
     </div>
