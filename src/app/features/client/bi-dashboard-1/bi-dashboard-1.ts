@@ -101,10 +101,10 @@ export class BiDashboard1 implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadDashboard();
-    // Auto-refresh a cada 10 segundos
+    // Auto-refresh a cada 30 segundos
     this.refreshInterval = setInterval(() => {
       this.loadDashboard();
-    }, 10000);
+    }, 30000);
   }
 
   ngOnDestroy() {
