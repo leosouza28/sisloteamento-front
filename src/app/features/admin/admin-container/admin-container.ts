@@ -149,13 +149,13 @@ export class AdminContainer {
         scopes: [],
         submenu: [
           {
-            scopes: ["usuarios.leitura"],
+            scopes: ["loteamentos.leitura"],
             icon: 'bi bi-search me-2',
             nome: 'Consultar',
             link: '/admin/loteamentos/consultar'
           },
           {
-            scopes: ["usuarios.leitura"],
+            scopes: ["loteamentos.leitura"],
             icon: 'bi bi-search me-2',
             nome: 'Lotes por Loteamento',
             link: '/admin/loteamentos/lotes/consultar'
@@ -169,13 +169,13 @@ export class AdminContainer {
         scopes: [],
         submenu: [
           {
-            scopes: ["usuarios.leitura"],
+            scopes: ["reservas.editar"],
             icon: 'bi bi-plus-lg me-2',
             nome: 'Nova Reserva',
             link: '/admin/reservas/operar'
           },
           {
-            scopes: ["usuarios.leitura"],
+            scopes: ["reservas.leitura"],
             icon: 'bi bi-search me-2',
             nome: 'Consultar',
             link: '/admin/reservas/consultar'
