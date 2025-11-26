@@ -45,7 +45,9 @@ export class ReservasNovaReserva {
   loteamentos = signal<any[]>([]);
   loteamentoSelecionado = signal<any | null>(null);
   quadrasAgrupadas = signal<QuadraAgrupada[]>([]);
+  quadrasAgrupadasOriginal = signal<QuadraAgrupada[]>([]);
   lotesSelecionados = signal<Set<string>>(new Set());
+  buscaLote = signal('');
 
   buscaCliente = signal('');
   buscandoCliente = signal(false);
@@ -141,6 +143,8 @@ export class ReservasNovaReserva {
       // Agrupar lotes por quadra
       const agrupadas = this.agruparPorQuadra(lotes);
       this.quadrasAgrupadas.set(agrupadas);
+      this.quadrasAgrupadasOriginal.set(agrupadas);
+      this.buscaLote.set('');
     } catch (error) {
       console.error('Erro ao carregar lotes:', error);
       this.alertService.showDanger('Erro ao carregar lotes');
@@ -192,6 +196,52 @@ export class ReservasNovaReserva {
 
   isLoteDisponivel(situacao: string): boolean {
     return situacao === 'DISPONIVEL';
+  }
+
+  onBuscaLoteChange(termo: string) {
+    this.buscaLote.set(termo);
+    this.filtrarLotes(termo);
+  }
+
+  filtrarLotes(termo: string) {
+    if (!termo || termo.trim() === '') {
+      // Se não houver termo, mostrar todas as quadras
+      this.quadrasAgrupadas.set(this.quadrasAgrupadasOriginal());
+      return;
+    }
+
+    const termoLower = termo.toLowerCase().trim();
+    const quadrasOriginais = this.quadrasAgrupadasOriginal();
+    const quadrasFiltradas: QuadraAgrupada[] = [];
+
+    quadrasOriginais.forEach((quadra) => {
+      // Verificar se a busca corresponde ao número da quadra
+      const quadraMatch = quadra.quadra.toLowerCase().includes(termoLower);
+
+      if (quadraMatch) {
+        // Se a quadra corresponde, incluir todos os lotes
+        quadrasFiltradas.push(quadra);
+      } else {
+        // Se não, filtrar apenas os lotes que correspondem
+        const lotesFiltrados = quadra.lotes.filter((lote) =>
+          lote.lote.toLowerCase().includes(termoLower)
+        );
+
+        if (lotesFiltrados.length > 0) {
+          quadrasFiltradas.push({
+            quadra: quadra.quadra,
+            lotes: lotesFiltrados
+          });
+        }
+      }
+    });
+
+    this.quadrasAgrupadas.set(quadrasFiltradas);
+  }
+
+  limparBusca() {
+    this.buscaLote.set('');
+    this.quadrasAgrupadas.set(this.quadrasAgrupadasOriginal());
   }
 
   get totalSelecionados(): number {

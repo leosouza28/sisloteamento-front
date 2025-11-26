@@ -65,7 +65,44 @@
             </div>
           }
 
-          @if (quadrasAgrupadas().length > 0) {
+          @if (quadrasAgrupadasOriginal().length > 0) {
+            <div class="mb-4">
+              <label class="form-label">Buscar Quadra ou Lote</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  [value]="buscaLote()"
+                  (input)="onBuscaLoteChange($any($event.target).value)"
+                  placeholder="Digite o número da quadra ou do lote..."
+                />
+                @if (buscaLote()) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    (click)="limparBusca()"
+                  >
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                }
+              </div>
+              @if (buscaLote() && quadrasAgrupadas().length === 0) {
+                <div class="alert alert-info mt-2 mb-0">
+                  <i class="bi bi-info-circle me-2"></i>
+                  Nenhum lote ou quadra encontrado com o termo "{{ buscaLote() }}".
+                </div>
+              }
+              @if (buscaLote() && quadrasAgrupadas().length > 0) {
+                <small class="text-muted mt-1 d-block">
+                  <i class="bi bi-funnel me-1"></i>
+                  Mostrando resultados filtrados para "{{ buscaLote() }}"
+                </small>
+              }
+            </div>
+
             <div class="row">
               @for (quadra of quadrasAgrupadas(); track quadra.quadra) {
                 <div class="col-12 mb-4">
