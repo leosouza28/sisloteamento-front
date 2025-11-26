@@ -1,0 +1,17 @@
+// Minimal custom styles - relying primarily on Bootstrap
+.card {
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+// Animation for refresh button icon
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-outline-primary:hover i {
+  animation: spin 0.5s linear;
+}

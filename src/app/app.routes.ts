@@ -13,12 +13,17 @@ import { ReservasNovaReserva } from './features/admin/reservas/reservas-nova-res
 import { ReservasConsultar } from './features/admin/reservas/reservas-consultar/reservas-consultar';
 import { ReservasVisualizar } from './features/admin/reservas/reservas-visualizar/reservas-visualizar';
 import { LoteamentosLote } from './features/admin/loteamentos/loteamentos-lote/loteamentos-lote';
+import { BiDashboard1 } from './features/client/bi-dashboard-1/bi-dashboard-1';
 
 export const routes: Routes = [
     {
         path: '',
         component: MainLayout,
         children: [
+            {
+                path: 'dashboard',
+                component: BiDashboard1
+            },
             {
                 path: '',
                 redirectTo: 'admin/login',

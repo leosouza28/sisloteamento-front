@@ -5,6 +5,7 @@ import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 import { provideEnvironmentNgxMask } from 'ngx-mask';
 import { NgxCurrencyInputMode, provideEnvironmentNgxCurrency } from 'ngx-currency';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
       min: null,
       max: null,
       inputMode: NgxCurrencyInputMode.Financial,
-    })
+    }),
+    provideCharts(withDefaultRegisterables())
   ]
 };

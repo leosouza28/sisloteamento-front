@@ -9,7 +9,9 @@ export class EndpointService extends ApiService {
     getDashboard() {
         return this.get('/v1/admin/dashboard/admin');
     }
-
+    getDashboardClient() {
+        return this.get('/v1/admin/dashboard/client');
+    }
     login(data: any) {
         return this.post('/v1/login', data);
     }
