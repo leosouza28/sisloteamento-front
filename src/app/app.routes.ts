@@ -21,13 +21,13 @@ export const routes: Routes = [
         component: MainLayout,
         children: [
             {
-                path: 'dashboard',
-                component: BiDashboard1
-            },
-            {
                 path: '',
                 redirectTo: 'admin/login',
                 pathMatch: 'full'
+            },
+            {
+                path: 'dashboard',
+                component: BiDashboard1
             },
             {
                 path: 'admin/login',
