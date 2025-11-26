@@ -59,7 +59,7 @@
                 @for (usuario of usuarios(); track usuario._id) {
                   <tr>
                     <td>{{ usuario.nome }}</td>
-                    <td>{{ usuario.documento }}</td>
+                    <td>{{ usuario!.documento | cpfCnpj }}</td>
                     <td>{{ usuario.email }}</td>
                     <td>
                       <span [ngClass]="getStatusClass(usuario.status)">

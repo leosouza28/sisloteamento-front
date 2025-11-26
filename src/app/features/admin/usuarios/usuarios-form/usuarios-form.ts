@@ -87,7 +87,7 @@ export class UsuariosForm implements OnInit {
         if (params['id']) {
           this.usuarioId.set(params['id']);
           this.loadUsuario(params['id']);
-          this.form.get('documento')?.disable();
+          // Não desabilitar o campo documento aqui, pois pode estar vazio e precisar ser preenchido
         } else {
           this.form.get('senha')?.setValidators([Validators.required]);
           // Para criação de usuário via formulário padrão (não clienteOnly), documento é obrigatório
@@ -163,6 +163,13 @@ export class UsuariosForm implements OnInit {
         (response.telefones || []).forEach((tel: any) => {
           this.telefones.push(this.createTelefone(tel));
         });
+
+        // Se o documento vier vazio, permitir edição; caso contrário, desabilitar
+        if (response.documento && response.documento.trim() !== '') {
+          this.form.get('documento')?.disable();
+        } else {
+          this.form.get('documento')?.enable();
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar usuário:', error);
@@ -346,9 +353,13 @@ export class UsuariosForm implements OnInit {
       if (this.modalMode) {
         // Quando usado em modal (ex.: cadastro rápido de cliente), usar endpoint simples
         response = await this.endpointService.saveUsuarioCliente(payload);
+        console.log("2");
       } else {
         response = await this.endpointService.saveUsuario(payload);
+        console.log("2");
       }
+
+      console.log(response);
 
       if (response) {
         this.alertService.showSuccess(this.clienteOnly ? 'Cliente cadastrado com sucesso!' : 'Usuário salvo com sucesso!');
