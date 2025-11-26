@@ -17,6 +17,10 @@ import { BiDashboard1 } from './features/client/bi-dashboard-1/bi-dashboard-1';
 
 export const routes: Routes = [
     {
+        path: 'dashboard',
+        component: BiDashboard1
+    },
+    {
         path: '',
         component: MainLayout,
         children: [
@@ -24,10 +28,6 @@ export const routes: Routes = [
                 path: '',
                 redirectTo: 'admin/login',
                 pathMatch: 'full'
-            },
-            {
-                path: 'dashboard',
-                component: BiDashboard1
             },
             {
                 path: 'admin/login',
