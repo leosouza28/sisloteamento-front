@@ -111,18 +111,8 @@ export const routes: Routes = [
                         path: 'logoff',
                         component: Logoff
                     },
-                    {
-                        path: '',
-                        redirectTo: 'login',
-                        pathMatch: 'full'
-                    }
                 ]
             },
         ]
-    },
-    {
-        path: '**',
-        redirectTo: 'admin/login',
-        pathMatch: 'full'
     },
 ];
