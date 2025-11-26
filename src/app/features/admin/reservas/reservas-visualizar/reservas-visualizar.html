@@ -21,7 +21,7 @@
       }
 
       @if (reserva()?.data_reserva) {
-        <p class="text-muted mb-0">Data da Reserva: <strong>{{ reserva()?.data_reserva | dateSimple }}</strong></p>
+        <p class="text-muted mb-0">Data da Reserva: <strong>{{ reserva()!.data_reserva | date:'dd/MM/yyyy' }}</strong></p>
       }
     </div>
     <div class="col-auto">
