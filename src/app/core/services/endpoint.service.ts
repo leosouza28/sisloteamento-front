@@ -69,6 +69,9 @@ export class EndpointService extends ApiService {
     saveLoteamento(data: any) {
         return this.post('/v1/loteamentos', data);
     }
+    saveMapaVirtualLoteamento(data: any) {
+        return this.post('/v1/loteamentos/mapa-virtual', data);
+    }
 
     importarLotes(data: any) {
         return this.post('/v1/lotes/importar', data);

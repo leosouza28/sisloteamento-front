@@ -14,11 +14,22 @@ import { ReservasConsultar } from './features/admin/reservas/reservas-consultar/
 import { ReservasVisualizar } from './features/admin/reservas/reservas-visualizar/reservas-visualizar';
 import { LoteamentosLote } from './features/admin/loteamentos/loteamentos-lote/loteamentos-lote';
 import { BiDashboard1 } from './features/client/bi-dashboard-1/bi-dashboard-1';
+import { LotesMapaVirtual } from './features/admin/loteamentos/lotes-mapa-virtual/lotes-mapa-virtual';
+import { BiDashboard2 } from './features/client/bi-dashboard-2/bi-dashboard-2';
+import { LivemapLoteamento } from './features/client/livemap-loteamento/livemap-loteamento';
 
 export const routes: Routes = [
     {
         path: 'dashboard',
         component: BiDashboard1
+    },
+    {
+        path: 'dashboard/loteamento/:id',
+        component: BiDashboard2
+    },
+    {
+        path: 'livemap/:id',
+        component: LivemapLoteamento
     },
     {
         path: '',
@@ -73,6 +84,10 @@ export const routes: Routes = [
                             {
                                 path: 'lotes-importar',
                                 component: LotesImportar
+                            },
+                            {
+                                path: 'lotes-mapa-virtual',
+                                component: LotesMapaVirtual
                             },
                             {
                                 path: 'lotes/consultar',

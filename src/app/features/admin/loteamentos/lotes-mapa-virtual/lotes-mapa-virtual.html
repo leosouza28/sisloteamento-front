@@ -1,0 +1,171 @@
+<div class="mapa-virtual-container">
+  <div class="toolbar">
+    <div class="toolbar-section">
+      <label class="toolbar-label">Loteamento:</label>
+      <select 
+        [(ngModel)]="loteamentoSelecionado" 
+        class="select-loteamento"
+        (change)="carregarMapaExistente()">
+        <option value="">Selecione um loteamento</option>
+        <option *ngFor="let loteamento of loteamentos" [value]="loteamento._id">
+          {{ loteamento.nome }}
+        </option>
+      </select>
+    </div>
+
+    <div class="toolbar-section">
+      <label class="file-upload">
+        <input 
+          type="file" 
+          accept="image/*" 
+          (change)="onImageUpload($event)"
+          [disabled]="!loteamentoSelecionado || uploading" />
+        <span>
+          <span *ngIf="!uploading">📁 Carregar Mapa</span>
+          <span *ngIf="uploading">⏳ Enviando...</span>
+        </span>
+      </label>
+    </div>
+
+    <div class="toolbar-section">
+      <button 
+        class="btn" 
+        [class.btn-active]="modoDesenho" 
+        (click)="toggleModoDesenho()"
+        [disabled]="!backgroundImage">
+        {{ modoDesenho ? '✏️ Desenhando' : '🖱️ Navegação' }}
+      </button>
+      <button 
+        class="btn" 
+        [class.btn-active]="modoSelecaoMultipla" 
+        (click)="toggleModoSelecaoMultipla()"
+        [disabled]="!backgroundImage">
+        {{ modoSelecaoMultipla ? '☑️ Selecionando' : '☑️ Seleção Múltipla' }}
+      </button>
+    </div>
+
+    <div class="toolbar-section" *ngIf="modoDesenho">
+      <input 
+        type="text" 
+        [(ngModel)]="quadraAtual" 
+        placeholder="Quadra" 
+        class="input-small"
+        maxlength="3" />
+      <input 
+        type="text" 
+        [(ngModel)]="numeroLoteAtual" 
+        placeholder="Nº Lote" 
+        class="input-small"
+        maxlength="4" />
+      <input 
+        type="color" 
+        [(ngModel)]="corAtual" 
+        class="color-picker" />
+    </div>
+
+    <div class="toolbar-section">
+      <button class="btn btn-secondary btn-icon" (click)="zoomOut()" title="Diminuir zoom">-</button>
+      <span class="zoom-level">{{ (zoomLevel * 100).toFixed(0) }}%</span>
+      <button class="btn btn-secondary btn-icon" (click)="zoomIn()" title="Aumentar zoom">+</button>
+      <button class="btn btn-secondary" (click)="resetZoom()">🔍 Reset</button>
+    </div>
+
+    <div class="toolbar-section">
+      <button 
+        class="btn btn-primary btn-large" 
+        (click)="salvarMapaVirtual()"
+        [disabled]="!loteamentoSelecionado || !backgroundImageUrl || lotes.length === 0 || salvando">
+        <span *ngIf="!salvando">💾 Salvar Mapa Virtual</span>
+        <span *ngIf="salvando">⏳ Salvando...</span>
+      </button>
+    </div>
+
+    <div class="toolbar-section">
+      <button 
+        class="btn btn-danger" 
+        (click)="limparMapa()"
+        [disabled]="lotes.length === 0">
+        🗑️ Limpar
+      </button>
+      <button 
+        class="btn btn-success" 
+        (click)="exportarDados()"
+        [disabled]="lotes.length === 0">
+        💾 Exportar JSON
+      </button>
+      <button 
+        class="btn btn-info" 
+        (click)="exportarImagem()"
+        [disabled]="!backgroundImage">
+        📸 Exportar Imagem
+      </button>
+    </div>
+  </div>
+
+  <div class="info-bar" *ngIf="backgroundImage">
+    <div class="info-item" *ngIf="!modoDesenho && !modoSelecaoMultipla">
+      <strong>🖱️ Modo Navegação:</strong> Arraste para mover o mapa | Clique direito no lote para opções | Duplo clique para editar
+    </div>
+    <div class="info-item" *ngIf="modoDesenho">
+      <strong>✏️ Modo Desenho:</strong> Preencha Quadra e Nº do Lote | Clique e arraste no mapa para criar | Após criar, clique direito para duplicar
+    </div>
+    <div class="info-item" *ngIf="modoSelecaoMultipla">
+      <strong>☑️ Modo Seleção Múltipla:</strong> Clique e arraste para selecionar vários lotes | Use Ctrl+C para copiar | Ctrl+V para colar (será solicitada a nova quadra)
+    </div>
+  </div>
+
+  <div class="canvas-wrapper" (click)="onCanvasClick()">
+    <div id="canvas-container"></div>
+    <div class="empty-state" *ngIf="!backgroundImage">
+      <div class="empty-content">
+        <span class="empty-icon">📌</span>
+        <p>Carregue uma imagem do mapa para começar</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu de Contexto -->
+  <div 
+    class="context-menu" 
+    *ngIf="contextMenu.visible"
+    [style.left.px]="contextMenu.x"
+    [style.top.px]="contextMenu.y">
+    <div class="context-menu-item" (click)="editarLote(loteSelecionado!, contextMenu.lote!)">
+      ✏️ Editar Lote
+    </div>
+    <div class="context-menu-item" (click)="duplicarLote(contextMenu.lote!)">
+      📋 Duplicar Lote
+    </div>
+    <div class="context-menu-item danger" (click)="excluirLote(contextMenu.lote!)">
+      🗑️ Excluir Lote
+    </div>
+  </div>
+
+  <div class="lotes-list" *ngIf="lotes.length > 0">
+    <h3>Lotes Marcados ({{ lotes.length }})</h3>
+    <div class="info-atalho">
+      💡 <strong>Dica:</strong> Clique em um lote e use <kbd>Ctrl</kbd>+<kbd>C</kbd> para copiar, <kbd>Ctrl</kbd>+<kbd>V</kbd> para colar
+    </div>
+    <div class="lotes-grid">
+      <div class="lote-item" *ngFor="let lote of lotes" [class.selected]="loteIdSelecionado === lote.id">
+        <span class="lote-badge" [style.background-color]="lote.cor">
+          Q{{ lote.quadra }} L{{ lote.numero }}
+        </span>
+        <div class="lote-actions">
+          <button 
+            class="action-btn edit" 
+            (click)="editarLoteDaLista(lote)"
+            title="Editar lote">
+            ✏️
+          </button>
+          <button 
+            class="action-btn delete" 
+            (click)="excluirLoteDaLista(lote)"
+            title="Excluir lote">
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

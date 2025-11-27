@@ -1,0 +1,52 @@
+.card-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+.card {
+  border-radius: 12px;
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+}
+
+.badge {
+  border-radius: 8px;
+}
+
+// Animação suave ao trocar entre views
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.row > div {
+  animation: fadeIn 0.3s ease;
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  h1, h2, h3 {
+    font-size: calc(1.2rem + 0.3vw);
+  }
+}

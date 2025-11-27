@@ -1,1 +1,433 @@
-<p>bi-dashboard-2 works!</p>
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%); min-height: 100vh;">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="d-flex flex-column align-items-center justify-content-center" style="min-height: 400px;">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-3 text-muted">Carregando dados do loteamento...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading" class="container-xl">
+    
+    <!-- Vista de Cards -->
+    <div *ngIf="visualizacao === 'cards'">
+      <!-- Header -->
+      <div class="mb-4">
+        <h1 class="h2 fw-bold mb-2">{{ dashboardData.loteamento?.nome || 'Dashboard do Loteamento' }}</h1>
+        <p class="text-muted mb-0">
+          <i class="bi bi-geo-alt"></i> {{ dashboardData.loteamento?.cidade || '' }}, {{ dashboardData.loteamento?.estado || '' }}
+        </p>
+        <small class="text-muted">{{ dashboardData.loteamento?.descricao || '' }}</small>
+      </div>
+
+      <!-- Informações Gerais -->
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                  <i class="bi bi-grid-3x3 fs-1 text-info"></i>
+                </div>
+                <div>
+                  <p class="text-muted small mb-0">Total de Lotes</p>
+                  <h3 class="mb-0 fw-bold">{{ dashboardData.total_lotes_cadastrados || 0 }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                  <i class="bi bi-calendar-check fs-1 text-warning"></i>
+                </div>
+                <div>
+                  <p class="text-muted small mb-0">Total de Reservas</p>
+                  <h3 class="mb-0 fw-bold">{{ dashboardData.total_reservas || 0 }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                  <i class="bi bi-people fs-1 text-primary"></i>
+                </div>
+                <div>
+                  <p class="text-muted small mb-0">Vendedores</p>
+                  <h3 class="mb-0 fw-bold">{{ dashboardData.total_vendedores || 0 }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                  <i class="bi bi-person-check fs-1 text-success"></i>
+                </div>
+                <div>
+                  <p class="text-muted small mb-0">Clientes</p>
+                  <h3 class="mb-0 fw-bold">{{ dashboardData.total_clientes || 0 }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status dos Lotes e Gráfico -->
+      <div class="row g-3 mb-4">
+        <!-- Cards Clicáveis de Quantidade -->
+        <div class="col-12 col-lg-8">
+          <h4 class="fw-bold mb-3">Status dos Lotes</h4>
+          <div class="row g-3">
+        <div class="col-12 col-sm-6 col-xl-6">
+          <div class="card border-0 shadow-sm h-100 card-clickable" (click)="mostrarLista('disponiveis')" role="button">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="bg-success bg-opacity-10 p-2 rounded">
+                  <i class="bi bi-check-circle fs-4 text-success"></i>
+                </div>
+                <i class="bi bi-arrow-right text-muted"></i>
+              </div>
+              <h3 class="mb-1 fw-bold text-success">{{ dashboardData.total_lotes_disponiveis || 0 }}</h3>
+              <p class="text-muted small mb-0">Lotes Disponíveis</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-6">
+          <div class="card border-0 shadow-sm h-100 card-clickable" (click)="mostrarLista('vendidos')" role="button">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="bg-primary bg-opacity-10 p-2 rounded">
+                  <i class="bi bi-cash-coin fs-4 text-primary"></i>
+                </div>
+                <i class="bi bi-arrow-right text-muted"></i>
+              </div>
+              <h3 class="mb-1 fw-bold text-primary">{{ dashboardData.total_lotes_vendidos || 0 }}</h3>
+              <p class="text-muted small mb-0">Lotes Vendidos</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-6">
+          <div class="card border-0 shadow-sm h-100 card-clickable" (click)="mostrarLista('reservados')" role="button">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="bg-warning bg-opacity-10 p-2 rounded">
+                  <i class="bi bi-lock fs-4 text-warning"></i>
+                </div>
+                <i class="bi bi-arrow-right text-muted"></i>
+              </div>
+              <h3 class="mb-1 fw-bold text-warning">{{ dashboardData.total_lotes_reservados || 0 }}</h3>
+              <p class="text-muted small mb-0">Lotes Reservados</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-6">
+          <div class="card border-0 shadow-sm h-100 card-clickable" (click)="mostrarLista('bloqueados')" role="button">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="bg-danger bg-opacity-10 p-2 rounded">
+                  <i class="bi bi-x-circle fs-4 text-danger"></i>
+                </div>
+                <i class="bi bi-arrow-right text-muted"></i>
+              </div>
+              <h3 class="mb-1 fw-bold text-danger">{{ dashboardData.total_lotes_bloqueados || 0 }}</h3>
+              <p class="text-muted small mb-0">Lotes Bloqueados</p>
+            </div>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <!-- Gráfico de Proporção de Lotes -->
+        <div class="col-12 col-lg-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="fw-bold mb-3">Proporção de Lotes</h5>
+              <div style="height: 300px; position: relative;">
+                <canvas 
+                  baseChart
+                  [data]="lotesChartData"
+                  [options]="lotesChartOptions"
+                  [type]="lotesChartType">
+                </canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Valores por Status e Gráfico -->
+      <div class="row g-3 mb-4">
+        <!-- Cards de Valores -->
+        <div class="col-12 col-lg-8">
+          <h4 class="fw-bold mb-3">Valores por Status</h4>
+          <div class="row g-3">
+            <div class="col-12 col-sm-6 col-xl-6">
+              <div class="card border-0 shadow-sm border-start border-success border-4 h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                      <i class="bi bi-check-circle fs-2 text-success opacity-75"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <p class="text-muted text-uppercase small mb-1">Disponíveis</p>
+                      <h5 class="mb-0 fw-bold text-success">{{ getValorDisponiveis() | moneyBrl }}</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-6">
+              <div class="card border-0 shadow-sm border-start border-primary border-4 h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                      <i class="bi bi-cash-coin fs-2 text-primary opacity-75"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <p class="text-muted text-uppercase small mb-1">Vendidos</p>
+                      <h5 class="mb-0 fw-bold text-primary">{{ getValorVendidos() | moneyBrl }}</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-6">
+              <div class="card border-0 shadow-sm border-start border-warning border-4 h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                      <i class="bi bi-lock fs-2 text-warning opacity-75"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <p class="text-muted text-uppercase small mb-1">Reservados</p>
+                      <h5 class="mb-0 fw-bold text-warning">{{ getValorReservados() | moneyBrl }}</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-6">
+              <div class="card border-0 shadow-sm border-start border-danger border-4 h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                      <i class="bi bi-x-circle fs-2 text-danger opacity-75"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <p class="text-muted text-uppercase small mb-1">Bloqueados</p>
+                      <h5 class="mb-0 fw-bold text-danger">{{ getValorBloqueados() | moneyBrl }}</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico de Valores -->
+        <div class="col-12 col-lg-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="fw-bold mb-3">Proporção de Valores</h5>
+              <div style="height: 300px; position: relative;">
+                <canvas 
+                  baseChart
+                  [data]="valoresChartData"
+                  [options]="valoresChartOptions"
+                  [type]="valoresChartType">
+                </canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Últimas Reservas -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="mb-0">Últimas Reservas</h5>
+            <small class="text-muted">{{ dashboardData.lista_ultimas_reservas?.length || 0 }} registros recentes</small>
+          </div>
+        </div>
+
+        <div *ngIf="dashboardData.lista_ultimas_reservas?.length > 0" class="row g-3">
+          <div *ngFor="let reserva of dashboardData.lista_ultimas_reservas" class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 border-start border-4" [ngClass]="{
+              'border-success': reserva.situacao === 'ATIVA',
+              'border-primary': reserva.situacao === 'CONCLUIDA',
+              'border-danger': reserva.situacao === 'CANCELADA'
+            }">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <h6 class="mb-1 text-primary fw-bold">{{ reserva.codigo_reserva || '-' }}</h6>
+                    <small class="text-muted">
+                      <i class="bi bi-calendar3"></i> {{ reserva.data_reserva | dateSimple }}
+                    </small>
+                  </div>
+                  <span class="badge" [ngClass]="{
+                    'bg-success': reserva.situacao === 'ATIVA',
+                    'bg-primary': reserva.situacao === 'CONCLUIDA',
+                    'bg-danger': reserva.situacao === 'CANCELADA'
+                  }">
+                    {{ reserva.situacao || '-' }}
+                  </span>
+                </div>
+
+                <div class="mb-2">
+                  <small class="text-muted d-block mb-1">
+                    <i class="bi bi-clock"></i> {{ reserva.createdAt | dateFromNow }}
+                  </small>
+                </div>
+
+                <hr class="my-2">
+
+                <div class="mb-2">
+                  <small class="text-muted d-block">Cliente</small>
+                  <span class="fw-semibold">{{ reserva.cliente?.nome || '-' }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small class="text-muted d-block">Lote</small>
+                    <span class="badge bg-secondary">Q{{ reserva.quadra || '-' }} L{{ reserva.lote || '-' }}</span>
+                  </div>
+                  <div class="text-end">
+                    <small class="text-muted d-block">Valor Total</small>
+                    <span class="fw-bold text-success">{{ reserva.valor_total | moneyBrl }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!dashboardData.lista_ultimas_reservas?.length" class="card">
+          <div class="card-body text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+            <p class="mb-0">Nenhuma reserva registrada ainda</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista de Lista -->
+    <div *ngIf="visualizacao === 'lista' && listaAtual">
+      <!-- Header da Lista -->
+      <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white p-3 rounded">
+        <div>
+          <button class="btn btn-outline-secondary mb-2" (click)="voltarParaCards()">
+            <i class="bi bi-arrow-left"></i> Voltar
+          </button>
+          <h2 class="h3 fw-bold mb-0">{{ listaAtual.titulo }}</h2>
+          <small class="text-muted">{{ listaAtual.dados.length }} lote(s)</small>
+        </div>
+      </div>
+
+      <!-- Resumo Financeiro -->
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+          <div class="card border-0 shadow-sm border-start border-primary border-4">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                  <i class="bi bi-cash-stack fs-1 text-primary opacity-75"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <p class="text-muted text-uppercase small mb-1">Total de Entradas</p>
+                  <h3 class="mb-0 fw-bold text-primary">{{ getTotalEntrada() | moneyBrl }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="card border-0 shadow-sm border-start border-success border-4">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                  <i class="bi bi-currency-dollar fs-1 text-success opacity-75"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <p class="text-muted text-uppercase small mb-1">Valor Total dos Lotes</p>
+                  <h3 class="mb-0 fw-bold text-success">{{ getTotalValor() | moneyBrl }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Lotes -->
+      <div class="row g-3">
+        <div class="col-12" *ngFor="let lote of listaAtual.dados">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <div [class]="'badge ' + getStatusClass(listaAtual.tipo) + ' fs-5 px-3 py-2'">
+                    <i [class]="'bi ' + getStatusIcon(listaAtual.tipo)"></i>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <p class="text-muted small mb-0">Quadra / Lote</p>
+                      <p class="fw-bold mb-0">Q{{ lote.quadra }} L{{ lote.lote }}</p>
+                    </div>
+                    <div class="col-12 col-md-2">
+                      <p class="text-muted small mb-0">Área</p>
+                      <p class="mb-0">{{ lote.area || '-' }} m²</p>
+                    </div>
+                    <div class="col-12 col-md-2">
+                      <p class="text-muted small mb-0">Valor Entrada</p>
+                      <p class="fw-bold mb-0 text-primary">{{ lote.valor_entrada | moneyBrl }}</p>
+                    </div>
+                    <div class="col-12 col-md-2">
+                      <p class="text-muted small mb-0">Valor Total</p>
+                      <p class="fw-bold mb-0 text-success">{{ lote.valor_total | moneyBrl }}</p>
+                    </div>
+                    <div class="col-12 col-md-4" *ngIf="lote.cliente">
+                      <p class="text-muted small mb-0">Cliente</p>
+                      <p class="mb-0">{{ lote.reserva.cliente.nome }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensagem quando não há lotes -->
+        <div class="col-12" *ngIf="listaAtual.dados.length === 0">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+              <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+              <p class="text-muted mb-0">Nenhum lote encontrado nesta categoria</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
