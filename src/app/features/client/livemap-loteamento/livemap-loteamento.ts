@@ -23,6 +23,9 @@ export class LivemapLoteamento implements OnInit {
   loadingInfo = true;
   imageUrl: string = '';
   loteamentoInfo: any = null;
+  errorMessage: string = '';
+  hasError = false;
+  lastUpdate: Date | null = null;
 
   // Controles de zoom e pan
   scale = 1;
@@ -62,9 +65,33 @@ export class LivemapLoteamento implements OnInit {
     });
   }
 
-  loadMap() {
-    this.loading = true;
-    this.imageUrl = `${environment.apiUrl}/public/loteamentos/mapa-virtual/${this.idLoteamento}?t=${Date.now()}`;
+  async loadMap() {
+    try {
+      this.loading = true;
+      this.hasError = false;
+      this.errorMessage = '';
+      const response = await this.endpointService.get(`/public/loteamentos/mapa-virtual/${this.idLoteamento}`);
+      this.imageUrl = response.url;
+      this.lastUpdate = response.last_update ? new Date(response.last_update) : null;
+    } catch (error: any) {
+      console.error('Erro ao carregar mapa:', error);
+      this.hasError = true;
+      
+      // Tratamento de mensagens de erro específicas
+      if (error?.error?.message) {
+        if (error.error.message.includes('não foi gerado')) {
+          this.errorMessage = 'O mapa virtual deste loteamento ainda está sendo processado. Por favor, aguarde alguns instantes e atualize a página.';
+        } else if (error.error.message.includes('não encontrado')) {
+          this.errorMessage = 'Loteamento não encontrado.';
+        } else {
+          this.errorMessage = error.error.message;
+        }
+      } else {
+        this.errorMessage = 'Erro ao carregar o mapa virtual. Tente novamente mais tarde.';
+      }
+      
+      this.loading = false;
+    }
   }
 
   async loadInfo() {
