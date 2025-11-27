@@ -44,6 +44,14 @@ export class LivemapLoteamento implements OnInit {
   showInfo = false;
   isTransitioning = true;
 
+  // Pinch-to-zoom
+  initialPinchDistance = 0;
+  initialScale = 1;
+
+  // Double-tap
+  lastTapTime = 0;
+  tapTimeout: any = null;
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.idLoteamento = params['id'];
@@ -157,16 +165,58 @@ export class LivemapLoteamento implements OnInit {
 
   // Touch controls for mobile
   onTouchStart(event: TouchEvent) {
+    // Pinch-to-zoom com 2 dedos
+    if (event.touches.length === 2) {
+      this.isPanning = false;
+      this.isTransitioning = false;
+      const touch1 = event.touches[0];
+      const touch2 = event.touches[1];
+      this.initialPinchDistance = this.getDistance(touch1, touch2);
+      this.initialScale = this.scale;
+      event.preventDefault();
+      return;
+    }
+
+    // Pan com 1 dedo (apenas se tiver zoom)
     if (this.scale > 1 && event.touches.length === 1) {
       this.isPanning = true;
       this.isTransitioning = false;
       this.startX = event.touches[0].clientX - this.translateX;
       this.startY = event.touches[0].clientY - this.translateY;
       event.preventDefault();
+      return;
+    }
+
+    // Double-tap para zoom
+    if (event.touches.length === 1) {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - this.lastTapTime;
+      
+      if (tapLength < 300 && tapLength > 0) {
+        // É um double tap
+        event.preventDefault();
+        this.handleDoubleTap(event.touches[0]);
+        this.lastTapTime = 0;
+      } else {
+        this.lastTapTime = currentTime;
+      }
     }
   }
 
   onTouchMove(event: TouchEvent) {
+    // Pinch-to-zoom
+    if (event.touches.length === 2 && this.initialPinchDistance > 0) {
+      event.preventDefault();
+      const touch1 = event.touches[0];
+      const touch2 = event.touches[1];
+      const currentDistance = this.getDistance(touch1, touch2);
+      const scale = (currentDistance / this.initialPinchDistance) * this.initialScale;
+      
+      this.scale = Math.max(this.minScale, Math.min(this.maxScale, scale));
+      return;
+    }
+
+    // Pan
     if (this.isPanning && event.touches.length === 1) {
       this.translateX = event.touches[0].clientX - this.startX;
       this.translateY = event.touches[0].clientY - this.startY;
@@ -177,6 +227,7 @@ export class LivemapLoteamento implements OnInit {
   onTouchEnd() {
     this.isPanning = false;
     this.isTransitioning = true;
+    this.initialPinchDistance = 0;
   }
 
   // Wheel zoom
@@ -207,5 +258,36 @@ export class LivemapLoteamento implements OnInit {
     link.href = this.imageUrl;
     link.download = `mapa-${this.loteamentoInfo?.loteamento?.nome || 'loteamento'}.png`;
     link.click();
+  }
+
+  // Calcula distância entre dois pontos de toque (para pinch)
+  private getDistance(touch1: Touch, touch2: Touch): number {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Handle double tap para zoom
+  private handleDoubleTap(touch: Touch) {
+    if (this.scale === 1 && this.fitToScreenScale > 1) {
+      // Se estiver sem zoom, dá zoom para preencher a tela
+      this.scale = this.fitToScreenScale;
+      
+      // Centraliza no ponto do toque
+      if (this.mapContainer) {
+        const container = this.mapContainer.nativeElement;
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const touchX = touch.clientX - rect.left;
+        const touchY = touch.clientY - rect.top;
+        
+        this.translateX = (centerX - touchX) * (this.scale - 1);
+        this.translateY = (centerY - touchY) * (this.scale - 1);
+      }
+    } else {
+      // Se já tiver zoom, reseta
+      this.resetZoom();
+    }
   }
 }

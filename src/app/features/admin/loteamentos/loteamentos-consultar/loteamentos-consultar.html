@@ -75,6 +75,12 @@
                                     <button class="btn btn-outline-success btn-sm" (click)="gerenciarLotes(loteamento._id)">
                                         <i class="bi bi-grid-3x3 me-2"></i>Importar Lotes
                                     </button>
+                                    <button class="btn btn-outline-info btn-sm" (click)="compartilharLivemap(loteamento._id, $event)">
+                                        <i class="bi bi-map me-2"></i>Link do Mapa ao Vivo
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" (click)="compartilharDashboard(loteamento._id, $event)">
+                                        <i class="bi bi-bar-chart me-2"></i>Link do Dashboard
+                                    </button>
                                 </div>
                             </div>
                             }

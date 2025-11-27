@@ -115,4 +115,59 @@ export class LoteamentosConsultar {
       this.selectedLoteamento.set(id);
     }
   }
+
+  async compartilharLivemap(id: string, event: Event) {
+    event.stopPropagation();
+    const url = `${window.location.origin}/livemap/${id}`;
+    await this.shareOrCopy(url, 'Link do Mapa ao Vivo copiado!');
+  }
+
+  async compartilharDashboard(id: string, event: Event) {
+    event.stopPropagation();
+    const url = `${window.location.origin}/dashboard/loteamento/${id}`;
+    await this.shareOrCopy(url, 'Link do Dashboard copiado!');
+  }
+
+  private async shareOrCopy(url: string, successMessage: string) {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Compartilhar Link',
+          url: url
+        });
+      } catch (error) {
+        // Se cancelar o share ou der erro, copia para área de transferência
+        if (error instanceof Error && error.name !== 'AbortError') {
+          await this.copyToClipboard(url, successMessage);
+        }
+      }
+    } else {
+      await this.copyToClipboard(url, successMessage);
+    }
+  }
+
+  private async copyToClipboard(text: string, successMessage: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(successMessage);
+    } catch (error) {
+      console.error('Erro ao copiar:', error);
+      // Fallback para navegadores mais antigos
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        alert(successMessage);
+      } catch (err) {
+        alert('Erro ao copiar link');
+      }
+      document.body.removeChild(textArea);
+    }
+  }
 }
