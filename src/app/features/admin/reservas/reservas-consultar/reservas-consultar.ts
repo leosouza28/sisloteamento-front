@@ -48,7 +48,7 @@ export class ReservasConsultar {
   reservas = signal<Reserva[]>([]);
   loading = signal(false);
   currentPage = signal(1);
-  perPage = signal(10);
+  perPage = signal(12);
   totalItems = signal(0);
   searchTerm = signal('');
 

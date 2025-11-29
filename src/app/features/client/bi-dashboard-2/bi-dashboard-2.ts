@@ -6,12 +6,11 @@ import { MoneyBrlPipe } from '../../../shared/pipes/money-brl.pipe';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { DateSimplePipe } from '../../../shared/pipes/date-simple.pipe';
-import { DateFromNowPipe } from '../../../shared/pipes/date-from-now-pipe';
 
 @Component({
   selector: 'app-bi-dashboard-2',
   standalone: true,
-  imports: [CommonModule, MoneyBrlPipe, BaseChartDirective, DateSimplePipe, DateFromNowPipe],
+  imports: [CommonModule, MoneyBrlPipe, BaseChartDirective, DateSimplePipe],
   templateUrl: './bi-dashboard-2.html',
   styleUrl: './bi-dashboard-2.scss',
 })

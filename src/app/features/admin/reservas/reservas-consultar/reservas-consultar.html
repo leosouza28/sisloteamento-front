@@ -48,14 +48,14 @@
                             'bg-danger text-white': reserva.situacao === 'CANCELADA'
                         }">
                             <div>
-                                <h6 class="mb-0">
+                                <h6 class="mb-0 text-white">
                                     <i class="bi bi-file-earmark-text me-2"></i>
-                                    {{ reserva.codigo_reserva || 'Sem código' }}
+                                    {{ reserva.codigo_reserva || 'Sem código' }} 
                                 </h6>
                             </div>
                             <span class="badge" [ngClass]="{
                                 'bg-dark': reserva.situacao === 'ATIVA',
-                                'bg-light text-success': reserva.situacao === 'CONCLUIDA',
+                                'bg-white text-success': reserva.situacao === 'CONCLUIDA',
                                 'bg-light text-danger': reserva.situacao === 'CANCELADA'
                             }">
                                 <i class="bi me-1" [ngClass]="{
