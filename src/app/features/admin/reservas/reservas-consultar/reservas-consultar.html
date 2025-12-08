@@ -3,7 +3,11 @@
         <div class="col">
             <h2 class="mb-0">Reservas</h2>
         </div>
-        <div class="col-auto">
+        <div class="col-auto d-flex gap-2">
+            <button class="btn btn-success" (click)="exportarCSV()" [disabled]="exportando() || loading()">
+                <i class="bi" [class.bi-download]="!exportando()" [class.bi-hourglass-split]="exportando()" class="me-2"></i>
+                {{ exportando() ? 'Exportando...' : 'Exportar CSV' }}
+            </button>
             <button class="btn btn-primary" (click)="novaReserva()">
                 <i class="bi bi-plus-circle me-2"></i>Nova Reserva
             </button>
@@ -12,15 +16,71 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <input #searchInput type="text" class="form-control"
-                            placeholder="Buscar por cliente, loteamento ou CPF..." [value]="searchTerm()"
-                            (keyup.enter)="onSearch(searchInput.value)" />
-                        <button class="btn btn-outline-secondary" type="button" (click)="onSearch(searchInput.value)">
-                            <i class="bi bi-search"></i>
-                        </button>
+            <!-- Filtros -->
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-3">
+                            <label class="form-label">Data Inicial</label>
+                            <input type="date" class="form-control" [value]="dataInicial()"
+                                (change)="dataInicial.set($any($event.target).value); onFilterChange()" />
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="form-label">Data Final</label>
+                            <input type="date" class="form-control" [value]="dataFinal()"
+                                (change)="dataFinal.set($any($event.target).value); onFilterChange()" />
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="form-label">Vendedor</label>
+                            <select class="form-select" [value]="vendedorId()"
+                                (change)="vendedorId.set($any($event.target).value); onFilterChange()">
+                                <option value="">Todos</option>
+                                @for (vendedor of vendedores(); track vendedor.id) {
+                                <option [value]="vendedor.id">{{ vendedor.nome }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="form-label">Loteamentos</label>
+                            <select class="form-select" [value]="loteamentoId()"
+                                (change)="loteamentoId.set($any($event.target).value); onFilterChange()">
+                                <option value="">Todos</option>
+                                @for (loteamento of loteamentos(); track loteamento.id) {
+                                <option [value]="loteamento.id">{{ loteamento.nome }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Buscar</label>
+                            <input #searchInput type="text" class="form-control"
+                                placeholder="Cliente ou CPF..." [value]="searchTerm()"
+                                (keyup.enter)="onSearch(searchInput.value)"
+                                (input)="onSearch(searchInput.value)" />
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="form-label">Situação</label>
+                            <select class="form-select" [value]="situacao()"
+                                (change)="situacao.set($any($event.target).value); onFilterChange()">
+                                @for (sit of situacoes; track sit.value) {
+                                <option [value]="sit.value">{{ sit.label }}</option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="col-lg-2">
+                            <label class="form-label">Por página</label>
+                            <select class="form-select" [value]="perPage()"
+                                (change)="onPerPageChange(+$any($event.target).value)">
+                                @for (option of perPageOptions; track option.value) {
+                                <option [value]="option.value">{{ option.value }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-lg-1 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" (click)="limparFiltros()" title="Limpar Filtros">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -40,7 +100,7 @@
             } @else {
             <div class="row">
                 @for (reserva of reservas(); track reserva._id) {
-                <div class="col-md-6 col-lg-4 mb-4">
+                <div class="col-md-6 col-lg-6 col-xl-4 mb-4">
                     <div class="card h-100 reserva-card" (click)="verReserva(reserva._id)">
                         <div class="card-header d-flex justify-content-between align-items-center" [ngClass]="{
                             'bg-warning text-dark': reserva.situacao === 'ATIVA',

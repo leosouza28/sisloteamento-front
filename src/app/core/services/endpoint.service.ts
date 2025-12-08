@@ -57,6 +57,9 @@ export class EndpointService extends ApiService {
         let url_search = new URLSearchParams(params).toString();
         return this.get('/v1/loteamentos?' + url_search);
     }
+    getLoteamentosDisponiveis() {
+        return this.get('/v1/loteamentos/disponiveis');
+    }
 
     getLoteamento(id: string) {
         return this.get('/v1/loteamento?id=' + id);
