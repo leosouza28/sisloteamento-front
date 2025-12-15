@@ -229,6 +229,9 @@ export class ReservasConsultar implements OnInit {
       if (this.dataFinal()) params.dataFinal = this.dataFinal();
       if (this.situacao()) params.situacao = this.situacao();
       if (this.vendedorId()) params.vendedorId = this.vendedorId();
+      if (this.loteamentoId()) params.loteamentoId = this.loteamentoId();
+      params.perpage = 10000;
+      params.page = 1;
 
       const response = await this.endpointService.getReservas(params);
 
